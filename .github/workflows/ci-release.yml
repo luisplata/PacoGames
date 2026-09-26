@@ -53,8 +53,11 @@ jobs:
       - name: Decode keystore
         run: |
           mkdir -p android/app
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
-          echo "${{ secrets.KEY_PROPERTIES }}" > android/key.properties
+          # tr -d '\n\r': GitHub a veces inserta newlines al pegar secrets
+          # largos (base64 de 5.9KB) → sin limpiar, base64 --decode falla.
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r' | base64 --decode > android/app/upload-keystore.jks
+          printf '%s' "${{ secrets.KEY_PROPERTIES }}" > android/key.properties
+          ls -la android/app/upload-keystore.jks
       - run: flutter build apk --release
       - run: flutter build appbundle --release
       - run: flutter build web
