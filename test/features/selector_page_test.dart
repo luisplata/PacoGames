@@ -18,17 +18,37 @@ void main() {
       expect(find.textContaining('Dibujá y adiviná'), findsOneWidget);
     });
 
-    testWidgets('juego con contenido → SnackBar "Próximamente" y no navega',
-        (tester) async {
+    testWidgets('Yo Nunca navega a /yo-nunca (sin snackbar)', (tester) async {
       await arrancarApp(tester, splashVisto: true);
       await navegarDesdeHome(tester, 'Jugar');
 
       await tester.tap(find.text('Yo Nunca'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Próximamente'), findsOneWidget);
-      // Seguimos en el selector (no navegó a un juego).
-      expect(find.text('Yo Nunca'), findsOneWidget);
+      // Instrucciones de Yo Nunca visibles; NO hay snackbar.
+      expect(find.text('Yo nunca'), findsOneWidget);
+      expect(find.textContaining('Próximamente'), findsNothing);
+    });
+
+    testWidgets('Ruleta y Pictionary → SnackBar "Próximamente (M2-M3)"',
+        (tester) async {
+      await arrancarApp(tester, splashVisto: true);
+      await navegarDesdeHome(tester, 'Jugar');
+
+      await tester.tap(find.text('Ruleta'));
+      await tester.pumpAndSettle();
+      expect(find.text('Próximamente (M2-M3)'), findsOneWidget);
+      // Seguimos en el selector.
+      expect(find.text('Ruleta'), findsOneWidget);
+
+      // Dejar expirar el snackbar antes del próximo tap.
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Pictionary'));
+      await tester.pumpAndSettle();
+      expect(find.text('Próximamente (M2-M3)'), findsOneWidget);
+      expect(find.text('Pictionary'), findsOneWidget);
     });
 
     testWidgets('juego sin cartas → badge "sin contenido" y no entra',

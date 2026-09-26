@@ -7,6 +7,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 
 import 'package:paco_game/app/app.dart';
 import 'package:paco_game/app/boot.dart';
+import 'package:paco_game/app/router.dart';
 import 'package:paco_game/core/ajustes/ajustes_providers.dart';
 import 'package:paco_game/core/ajustes/ajustes_repository.dart';
 import 'package:paco_game/core/contenido/diagnostico.dart';
@@ -119,6 +120,45 @@ void main() {
       await tester.tap(find.text('Diagnóstico'));
       await tester.pumpAndSettle();
       expect(find.textContaining('Todo en orden'), findsOneWidget);
+    });
+
+    testWidgets('rutas nuevas protegidas por splash: /yo-nunca/juego → /splash',
+        (tester) async {
+      final container = await arrancar(splashVisto: false);
+      await pumpApp(tester, container);
+      expect(find.widgetWithText(FilledButton, 'Entendido'), findsOneWidget);
+
+      // Solicitar la ruta del juego directamente: el redirect la protege.
+      container.read(routerProvider).go('/yo-nunca/juego');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(FilledButton, 'Entendido'), findsOneWidget);
+      expect(find.text('Yo nunca'), findsNothing);
+    });
+
+    testWidgets('flujo M1: Selector → /yo-nunca → [Jugar] → /yo-nunca/juego',
+        (tester) async {
+      final container = await arrancar(splashVisto: true);
+      await pumpApp(tester, container);
+
+      // Home → Selector
+      await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Yo Nunca'), findsOneWidget);
+
+      // Selector → /yo-nunca (instrucciones)
+      await tester.tap(find.text('Yo Nunca'));
+      await tester.pumpAndSettle();
+      expect(find.text('Yo nunca'), findsOneWidget);
+
+      // [Jugar] → /yo-nunca/juego. El fake tiene 1 solo género visible
+      // (Normal) → auto-select → carta con [Siguiente] (YN4).
+      final jugar = find.widgetWithText(FilledButton, 'Jugar');
+      await tester.ensureVisible(jugar);
+      await tester.pumpAndSettle();
+      await tester.tap(jugar);
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(FilledButton, 'Siguiente'), findsOneWidget);
     });
   });
 }

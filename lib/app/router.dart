@@ -7,13 +7,17 @@ import '../features/diagnostico/presentation/diagnostico_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/selector/presentation/selector_page.dart';
 import '../features/splash/presentation/splash_page.dart';
+import '../features/yo_nunca/presentation/yo_nunca_instrucciones_page.dart';
+import '../features/yo_nunca/presentation/yo_nunca_juego_page.dart';
 import 'boot.dart';
 
-/// Router M0: 6 rutas flat + redirect top-level async-safe (R1-R2).
+/// Router M0 + M1: 8 rutas flat + redirect top-level async-safe (R1-R2).
 ///
 /// El redirect lee el [BootBridge] (refreshListenable): cada notify
 /// re-evalúa la ruta actual. Mientras las prefs cargan (`splashVisto == null`)
 /// se asume `!splashVisto` → /splash, nunca /home prematuro.
+/// Las rutas `/yo-nunca` y `/yo-nunca/juego` quedan protegidas por el
+/// redirect (sin splash visto → /splash).
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
@@ -44,6 +48,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ComoSeJuegaPage(),
       ),
       GoRoute(path: '/diagnostico', builder: (context, state) => const DiagnosticoPage()),
+      GoRoute(
+        path: '/yo-nunca',
+        builder: (context, state) => const YoNuncaInstruccionesPage(),
+      ),
+      GoRoute(
+        path: '/yo-nunca/juego',
+        builder: (context, state) => const YoNuncaJuegoPage(),
+      ),
     ],
   );
 });

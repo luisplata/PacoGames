@@ -4,24 +4,44 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/contenido/diagnostico.dart';
 
-/// Datos fijos de las 3 tarjetas del selector (M0).
+/// Datos fijos de las 3 tarjetas del selector.
+///
+/// [ruta] no nula = juego jugable (navega con push); `null` = aún no
+/// implementado (SnackBar 'Próximamente (M2-M3)').
+/// [imagen] no nulo = leading con arte propio (reemplaza al ícono).
 class _JuegoInfo {
-  const _JuegoInfo(this.id, this.nombre, this.icono, this.descripcion);
+  const _JuegoInfo(
+    this.id,
+    this.nombre,
+    this.icono,
+    this.descripcion,
+    this.ruta, {
+    this.imagen,
+  });
 
   final String id;
   final String nombre;
   final IconData icono;
   final String descripcion;
+  final String? ruta;
+  final String? imagen;
 }
 
 const _juegos = [
-  _JuegoInfo('yo_nunca', 'Yo Nunca', Icons.help_outline, '¿Quién lo hizo?'),
-  _JuegoInfo('ruleta', 'Ruleta', Icons.casino_outlined, 'Girás y te toca'),
-  _JuegoInfo('pictionary', 'Pictionary', Icons.brush_outlined, 'Dibujá y adiviná'),
+  _JuegoInfo(
+    'yo_nunca',
+    'Yo Nunca',
+    Icons.help_outline,
+    '¿Quién lo hizo?',
+    '/yo-nunca',
+    imagen: 'assets/images/yo_nunca_selector.png',
+  ),
+  _JuegoInfo('ruleta', 'Ruleta', Icons.casino_outlined, 'Girás y te toca', null),
+  _JuegoInfo('pictionary', 'Pictionary', Icons.brush_outlined, 'Dibujá y adiviná', null),
 ];
 
 /// Selector de juegos: 3 tarjetas fijas. Sin cartas válidas → "sin contenido"
-/// y no entra; con contenido → SnackBar 'Próximamente' en M0.
+/// y no entra; con contenido → navega (Yo Nunca) o SnackBar 'Próximamente'.
 class SelectorPage extends ConsumerWidget {
   const SelectorPage({super.key});
 
@@ -64,17 +84,26 @@ class _TarjetaJuego extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: Icon(juego.icono, size: 32),
+        leading: juego.imagen != null
+            ? Image.asset(juego.imagen!, width: 32, height: 32)
+            : Icon(juego.icono, size: 32),
         title: Text(juego.nombre),
         subtitle: Text(tieneCartas ? juego.descripcion : 'sin contenido'),
         enabled: tieneCartas,
         onTap: tieneCartas
             ? () {
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    const SnackBar(content: Text('Próximamente (M1-M3)')),
-                  );
+                final ruta = juego.ruta;
+                if (ruta != null) {
+                  // Yo Nunca es jugable en M1: push preserva el back-stack
+                  // (la salida mid-game del juego necesita confirmación).
+                  context.push(ruta);
+                } else {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(content: Text('Próximamente (M2-M3)')),
+                    );
+                }
               }
             : null,
       ),

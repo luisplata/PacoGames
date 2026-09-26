@@ -31,6 +31,15 @@ class AjustesNotifier extends AsyncNotifier<Ajustes> {
   Future<void> cambiarModoAlcohol(bool valor) =>
       _actualizar((state.value ?? Ajustes.defaults).copyWith(modoAlcohol: valor));
 
+  /// Persiste el género preferido de un juego (A1): el picker lo usa como
+  /// default y lo llama al elegir. Copia el mapa — no pisa otros juegos.
+  Future<void> setGeneroPreferido(String juegoId, String nombre) {
+    final actual = state.value ?? Ajustes.defaults;
+    final generoPreferido = Map<String, String>.of(actual.generoPreferido)
+      ..[juegoId] = nombre;
+    return _actualizar(actual.copyWith(generoPreferido: generoPreferido));
+  }
+
   Future<void> marcarSplashVisto() =>
       _actualizar((state.value ?? Ajustes.defaults).copyWith(splashVisto: true));
 }
