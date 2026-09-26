@@ -1,4 +1,4 @@
-package com.bellseboss.v2.pacogame.paco_game
+package com.bellseboss.v2.pacogame
 
 import io.flutter.embedding.android.FlutterActivity
 
