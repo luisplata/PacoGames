@@ -47,14 +47,21 @@ jobs:
       - name: Extract version
         id: version
         run: RUN_NUMBER=${{ github.run_number }} bash scripts/release-info.sh >> "$GITHUB_OUTPUT"
-      # APK release firmado con el keystore debug del template (build.gradle.kts
-      # release signingConfig = debug): instalable sin secrets y ~5x más chico
-      # que el debug build. Play Store real = appbundle + keystore propio (follow-up).
+      # Decodificar keystore de producción desde secrets (patrón ref 500preguntas).
+      # KEYSTORE_BASE64 = base64 del upload-keystore.jks; KEY_PROPERTIES =
+      # contenido de android/key.properties con storeFile=upload-keystore.jks.
+      - name: Decode keystore
+        run: |
+          mkdir -p android/app
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "${{ secrets.KEY_PROPERTIES }}" > android/key.properties
       - run: flutter build apk --release
+      - run: flutter build appbundle --release
       - run: flutter build web
       - name: Package artifacts
         run: |
           cp build/app/outputs/flutter-apk/app-release.apk "${{ steps.version.outputs.APK_NAME }}"
+          cp build/app/outputs/bundle/release/app-release.aab "${{ steps.version.outputs.AAB_NAME }}"
           cd build/web && zip -r "$GITHUB_WORKSPACE/${{ steps.version.outputs.ZIP_NAME }}" .
       - uses: softprops/action-gh-release@v3
         with:
@@ -64,6 +71,7 @@ jobs:
           generate_release_notes: true
           files: |
             ${{ steps.version.outputs.APK_NAME }}
+            ${{ steps.version.outputs.AAB_NAME }}
             ${{ steps.version.outputs.ZIP_NAME }}
           fail_on_unmatched_files: true
           draft: false

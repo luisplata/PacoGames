@@ -10,6 +10,7 @@ RUN=${RUN_NUMBER:?}
 
 TAG="v${VERSION_NAME}-b${RUN}"
 APK_NAME="PacoGames-dev-${VERSION_NAME}-b${RUN}.apk"
+AAB_NAME="PacoGames-${VERSION_NAME}-b${RUN}.aab"
 ZIP_NAME="PacoGames-web-${VERSION_NAME}-b${RUN}.zip"
 
 echo "VERSION=${VERSION}"
@@ -17,4 +18,5 @@ echo "VERSION_NAME=${VERSION_NAME}"
 echo "VERSION_NUMBER=${VERSION_NUMBER}"
 echo "TAG=${TAG}"
 echo "APK_NAME=${APK_NAME}"
+echo "AAB_NAME=${AAB_NAME}"
 echo "ZIP_NAME=${ZIP_NAME}"

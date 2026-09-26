@@ -35,6 +35,7 @@ assert_line "VERSION_NAME=0.1.0" "$OUT"
 assert_line "VERSION_NUMBER=1" "$OUT"
 assert_line "TAG=v0.1.0-b42" "$OUT"
 assert_line "APK_NAME=PacoGames-dev-0.1.0-b42.apk" "$OUT"
+assert_line "AAB_NAME=PacoGames-0.1.0-b42.aab" "$OUT"
 assert_line "ZIP_NAME=PacoGames-web-0.1.0-b42.zip" "$OUT"
 
 # Case 2: RUN_NUMBER empty/missing -> must fail
