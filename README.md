@@ -74,6 +74,20 @@ Tests mirror the source tree: `test/features/<feature>/` ↔ `lib/features/<feat
 The smoke test (`test/app_smoke_test.dart`) pumps the real app inside a
 `ProviderScope` and asserts the home screen renders.
 
+## CI & Releases
+
+[![CI + Release](https://github.com/luisplata/PacoGames/actions/workflows/ci-release.yml/badge.svg)](https://github.com/luisplata/PacoGames/actions/workflows/ci-release.yml)
+
+Cada push a `main` (o dispatch manual desde Actions) corre analyze + tests,
+compila un APK dev (debug) y un ZIP web, y publica un GitHub Release con ambos
+artefactos descargables. La versión sale de `pubspec.yaml`; cada run tiene un
+tag único `v<version>-b<run_number>`, así que ningún release se pisa.
+
+| Artefacto | Nombre |
+|---|---|
+| APK dev | `PacoGames-dev-<version>-b<run>.apk` |
+| Web (ZIP) | `PacoGames-web-<version>-b<run>.zip` |
+
 ## Structure
 
 ```

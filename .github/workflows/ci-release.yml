@@ -1,0 +1,66 @@
+name: CI + Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ci-release-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.2
+          cache: true
+      - uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+      - name: Gradle heap override
+        run: echo "ORG_GRADLE_PROJECT_org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G" >> "$GITHUB_ENV"
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Test release-info script
+        run: bash scripts/test_release_info.sh
+      - name: Extract version
+        id: version
+        run: RUN_NUMBER=${{ github.run_number }} bash scripts/release-info.sh >> "$GITHUB_OUTPUT"
+      - run: flutter build apk --debug
+      - run: flutter build web
+      - name: Package artifacts
+        run: |
+          cp build/app/outputs/flutter-apk/app-debug.apk "${{ steps.version.outputs.APK_NAME }}"
+          cd build/web && zip -r "$GITHUB_WORKSPACE/${{ steps.version.outputs.ZIP_NAME }}" .
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: PacoGames dev ${{ steps.version.outputs.VERSION_NAME }} (build ${{ github.run_number }})
+          generate_release_notes: true
+          files: |
+            ${{ steps.version.outputs.APK_NAME }}
+            ${{ steps.version.outputs.ZIP_NAME }}
+          fail_on_unmatched_files: true
+          draft: false
