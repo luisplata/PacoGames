@@ -6,8 +6,9 @@ import '../../../core/ajustes/ajustes.dart';
 import '../../../core/ajustes/ajustes_providers.dart';
 import '../../../core/contenido/diagnostico.dart';
 import '../../../core/contenido/entidades.dart';
+import '../../../core/contenido/generos_visibles.dart';
+import '../../../core/widgets/aviso_modo_sin_alcohol.dart';
 import '../application/yo_nunca_providers.dart';
-import 'widgets/aviso_modo_sin_alcohol.dart';
 
 /// Juego de Yo Nunca (YN4-YN6, YN8): picker de género → mazo → frase +
 /// [Siguiente]; modo sin alcohol de doble efecto (banner + Picante oculto);

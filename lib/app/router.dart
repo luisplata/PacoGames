@@ -5,19 +5,21 @@ import '../features/ajustes/presentation/ajustes_page.dart';
 import '../features/como_se_juega/presentation/como_se_juega_page.dart';
 import '../features/diagnostico/presentation/diagnostico_page.dart';
 import '../features/home/presentation/home_page.dart';
+import '../features/ruleta/presentation/ruleta_instrucciones_page.dart';
+import '../features/ruleta/presentation/ruleta_juego_page.dart';
 import '../features/selector/presentation/selector_page.dart';
 import '../features/splash/presentation/splash_page.dart';
 import '../features/yo_nunca/presentation/yo_nunca_instrucciones_page.dart';
 import '../features/yo_nunca/presentation/yo_nunca_juego_page.dart';
 import 'boot.dart';
 
-/// Router M0 + M1: 8 rutas flat + redirect top-level async-safe (R1-R2).
+/// Router M0 + M1 + M2: 10 rutas flat + redirect top-level async-safe (R1-R2).
 ///
 /// El redirect lee el [BootBridge] (refreshListenable): cada notify
 /// re-evalúa la ruta actual. Mientras las prefs cargan (`splashVisto == null`)
 /// se asume `!splashVisto` → /splash, nunca /home prematuro.
-/// Las rutas `/yo-nunca` y `/yo-nunca/juego` quedan protegidas por el
-/// redirect (sin splash visto → /splash).
+/// Las rutas de los juegos (`/yo-nunca*`, `/ruleta*`) quedan protegidas por
+/// el redirect (sin splash visto → /splash).
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
@@ -55,6 +57,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/yo-nunca/juego',
         builder: (context, state) => const YoNuncaJuegoPage(),
+      ),
+      GoRoute(
+        path: '/ruleta',
+        builder: (context, state) => const RuletaInstruccionesPage(),
+      ),
+      GoRoute(
+        path: '/ruleta/juego',
+        builder: (context, state) => const RuletaJuegoPage(),
       ),
     ],
   );

@@ -8,15 +8,6 @@ import '../../../core/contenido/diagnostico.dart';
 import '../../../core/contenido/entidades.dart';
 import 'mazo.dart';
 
-/// Géneros visibles según el modo sin alcohol (YN2).
-///
-/// Filtra SOLO el género cuyo nombre (case-insensitive) es `'picante'`
-/// cuando [modoAlcohol] es `true`. Nunca reordena ni reescribe contenido.
-List<Genero> generosVisibles(List<Genero> generos, {required bool modoAlcohol}) {
-  if (!modoAlcohol) return generos;
-  return generos.where((g) => g.nombre.toLowerCase() != 'picante').toList();
-}
-
 /// Género seleccionado de la partida actual (YN3).
 ///
 /// `null` = sin género → la UI muestra el picker. Efímero: autoDispose

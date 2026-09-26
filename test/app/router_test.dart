@@ -136,6 +136,45 @@ void main() {
       expect(find.text('Yo nunca'), findsNothing);
     });
 
+    testWidgets('splash protege la ruta nueva: /ruleta/juego → /splash',
+        (tester) async {
+      final container = await arrancar(splashVisto: false);
+      await pumpApp(tester, container);
+      expect(find.widgetWithText(FilledButton, 'Entendido'), findsOneWidget);
+
+      // Solicitar la ruta del juego directamente: el redirect la protege.
+      container.read(routerProvider).go('/ruleta/juego');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(FilledButton, 'Entendido'), findsOneWidget);
+      expect(find.text('Ruleta'), findsNothing);
+    });
+
+    testWidgets('flujo M2: Selector → /ruleta → [Jugar] → /ruleta/juego',
+        (tester) async {
+      final container = await arrancar(splashVisto: true);
+      await pumpApp(tester, container);
+
+      // Home → Selector
+      await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ruleta'), findsOneWidget);
+
+      // Selector → /ruleta (instrucciones)
+      await tester.tap(find.text('Ruleta'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ruleta'), findsOneWidget);
+
+      // [Jugar] → /ruleta/juego. El fake tiene 1 solo género visible
+      // (Normal) → auto-select → rueda con [Girar] (RU8).
+      final jugar = find.widgetWithText(FilledButton, 'Jugar');
+      await tester.ensureVisible(jugar);
+      await tester.pumpAndSettle();
+      await tester.tap(jugar);
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(FilledButton, 'Girar'), findsOneWidget);
+    });
+
     testWidgets('flujo M1: Selector → /yo-nunca → [Jugar] → /yo-nunca/juego',
         (tester) async {
       final container = await arrancar(splashVisto: true);

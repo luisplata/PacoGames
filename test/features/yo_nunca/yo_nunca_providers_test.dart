@@ -57,38 +57,6 @@ void main() {
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
   });
 
-  group('generosVisibles (puro)', () {
-    test('modoAlcohol=false → devuelve todos, en orden', () {
-      final generos = [_normal, _picante];
-      expect(generosVisibles(generos, modoAlcohol: false), generos);
-    });
-
-    test('modoAlcohol=true → oculta el género picante (case-insensitive)', () {
-      final generos = [_normal, _picante];
-      expect(generosVisibles(generos, modoAlcohol: true), [_normal]);
-
-      final mayusculas = [
-        _normal,
-        const Genero(nombre: 'PICANTE', cartas: ['x']),
-        const Genero(nombre: 'Otro', cartas: ['y']),
-      ];
-      expect(generosVisibles(mayusculas, modoAlcohol: true), [_normal, mayusculas[2]]);
-    });
-
-    test('sin género picante → devuelve todo igual (no reordena)', () {
-      final generos = [
-        const Genero(nombre: 'Normal', cartas: ['a']),
-        const Genero(nombre: 'Familiar', cartas: ['b']),
-      ];
-      expect(generosVisibles(generos, modoAlcohol: true), generos);
-    });
-
-    test('lista vacía → vacía (sin crash)', () {
-      expect(generosVisibles(const [], modoAlcohol: true), isEmpty);
-      expect(generosVisibles(const [], modoAlcohol: false), isEmpty);
-    });
-  });
-
   group('yoNuncaGeneroProvider', () {
     test('estado inicial null → la UI muestra el picker', () {
       final container = crearContainer(SharedPreferencesAsync());

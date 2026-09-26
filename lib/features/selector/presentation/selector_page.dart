@@ -7,7 +7,7 @@ import '../../../core/contenido/diagnostico.dart';
 /// Datos fijos de las 3 tarjetas del selector.
 ///
 /// [ruta] no nula = juego jugable (navega con push); `null` = aún no
-/// implementado (SnackBar 'Próximamente (M2-M3)').
+/// implementado (SnackBar 'Próximamente (M3)').
 /// [imagen] no nulo = leading con arte propio (reemplaza al ícono).
 class _JuegoInfo {
   const _JuegoInfo(
@@ -36,12 +36,18 @@ const _juegos = [
     '/yo-nunca',
     imagen: 'assets/images/yo_nunca_selector.png',
   ),
-  _JuegoInfo('ruleta', 'Ruleta', Icons.casino_outlined, 'Girás y te toca', null),
+  _JuegoInfo(
+    'ruleta',
+    'Ruleta',
+    Icons.casino_outlined,
+    'Girás y te toca',
+    '/ruleta',
+  ),
   _JuegoInfo('pictionary', 'Pictionary', Icons.brush_outlined, 'Dibujá y adiviná', null),
 ];
 
 /// Selector de juegos: 3 tarjetas fijas. Sin cartas válidas → "sin contenido"
-/// y no entra; con contenido → navega (Yo Nunca) o SnackBar 'Próximamente'.
+/// y no entra; con contenido → navega (Yo Nunca / Ruleta) o SnackBar M3.
 class SelectorPage extends ConsumerWidget {
   const SelectorPage({super.key});
 
@@ -94,14 +100,14 @@ class _TarjetaJuego extends StatelessWidget {
             ? () {
                 final ruta = juego.ruta;
                 if (ruta != null) {
-                  // Yo Nunca es jugable en M1: push preserva el back-stack
-                  // (la salida mid-game del juego necesita confirmación).
+                  // Yo Nunca y Ruleta son jugables: push preserva el
+                  // back-stack (la salida mid-game necesita confirmación).
                   context.push(ruta);
                 } else {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
-                      const SnackBar(content: Text('Próximamente (M2-M3)')),
+                      const SnackBar(content: Text('Próximamente (M3)')),
                     );
                 }
               }

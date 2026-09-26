@@ -30,24 +30,29 @@ void main() {
       expect(find.textContaining('Próximamente'), findsNothing);
     });
 
-    testWidgets('Ruleta y Pictionary → SnackBar "Próximamente (M2-M3)"',
-        (tester) async {
+    testWidgets('Ruleta navega a /ruleta (sin snackbar)', (tester) async {
       await arrancarApp(tester, splashVisto: true);
       await navegarDesdeHome(tester, 'Jugar');
 
       await tester.tap(find.text('Ruleta'));
       await tester.pumpAndSettle();
-      expect(find.text('Próximamente (M2-M3)'), findsOneWidget);
-      // Seguimos en el selector.
-      expect(find.text('Ruleta'), findsOneWidget);
 
-      // Dejar expirar el snackbar antes del próximo tap.
-      await tester.pump(const Duration(seconds: 4));
-      await tester.pumpAndSettle();
+      // Instrucciones de la Ruleta visibles; NO hay snackbar.
+      expect(
+        find.text('Tocá [Girar] y esperá la animación: la ruleta elige por vos'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Próximamente'), findsNothing);
+    });
+
+    testWidgets('Pictionary → SnackBar "Próximamente (M3)"', (tester) async {
+      await arrancarApp(tester, splashVisto: true);
+      await navegarDesdeHome(tester, 'Jugar');
 
       await tester.tap(find.text('Pictionary'));
       await tester.pumpAndSettle();
-      expect(find.text('Próximamente (M2-M3)'), findsOneWidget);
+      expect(find.text('Próximamente (M3)'), findsOneWidget);
+      // Seguimos en el selector.
       expect(find.text('Pictionary'), findsOneWidget);
     });
 
