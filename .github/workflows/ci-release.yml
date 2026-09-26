@@ -56,7 +56,7 @@ jobs:
         run: |
           cp build/app/outputs/flutter-apk/app-release.apk "${{ steps.version.outputs.APK_NAME }}"
           cd build/web && zip -r "$GITHUB_WORKSPACE/${{ steps.version.outputs.ZIP_NAME }}" .
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
           target_commitish: ${{ github.sha }}
@@ -67,3 +67,5 @@ jobs:
             ${{ steps.version.outputs.ZIP_NAME }}
           fail_on_unmatched_files: true
           draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
