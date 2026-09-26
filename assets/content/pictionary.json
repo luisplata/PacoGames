@@ -1,0 +1,615 @@
+{
+  "generos": [
+    {
+      "nombre": "Normal",
+      "listaTextoCarta": [
+        {
+          "value": "Plato de cereales"
+        },
+        {
+          "value": "Hechicero/mago"
+        },
+        {
+          "value": "Timbal"
+        },
+        {
+          "value": "Rosa"
+        },
+        {
+          "value": "Petalo de Rosa"
+        },
+        {
+          "value": "Acostarse"
+        },
+        {
+          "value": "Laberinto"
+        },
+        {
+          "value": "Abofetear"
+        },
+        {
+          "value": "Equipaje/bolsos"
+        },
+        {
+          "value": "Trapecista"
+        },
+        {
+          "value": "España"
+        },
+        {
+          "value": "Cerveza"
+        },
+        {
+          "value": "Vino"
+        },
+        {
+          "value": "Medico"
+        },
+        {
+          "value": "Cucharón"
+        },
+        {
+          "value": "Bizcocho"
+        },
+        {
+          "value": "Pez fuera del Agua"
+        },
+        {
+          "value": "Tercer ojo"
+        },
+        {
+          "value": "Calentar"
+        },
+        {
+          "value": "Envase"
+        },
+        {
+          "value": "Polvora"
+        },
+        {
+          "value": "Pintar"
+        },
+        {
+          "value": "Lagartija"
+        },
+        {
+          "value": "Espina"
+        },
+        {
+          "value": "Manifestacion"
+        },
+        {
+          "value": "Guerra fría."
+        },
+        {
+          "value": "Fiesta"
+        },
+        {
+          "value": "Amasar"
+        },
+        {
+          "value": "Campana"
+        },
+        {
+          "value": "Toldo"
+        },
+        {
+          "value": "Centro"
+        },
+        {
+          "value": "Amnesia"
+        },
+        {
+          "value": "Cabalgar"
+        },
+        {
+          "value": "Espadachín"
+        },
+        {
+          "value": "Aluminio"
+        },
+        {
+          "value": "Sangre"
+        },
+        {
+          "value": "Estrecho"
+        },
+        {
+          "value": "Cucharita"
+        },
+        {
+          "value": "Rellenar"
+        },
+        {
+          "value": "Remolino"
+        },
+        {
+          "value": "Apagón"
+        },
+        {
+          "value": "Estrella de mar"
+        },
+        {
+          "value": "Billete falso"
+        },
+        {
+          "value": "Embarazada"
+        },
+        {
+          "value": "Muela de juicio"
+        },
+        {
+          "value": "Mujer barbuda"
+        },
+        {
+          "value": "Luciernaga"
+        },
+        {
+          "value": "Lluvia"
+        },
+        {
+          "value": "Tormenta"
+        },
+        {
+          "value": "TV"
+        },
+        {
+          "value": "Aerobico"
+        },
+        {
+          "value": "Taxista"
+        },
+        {
+          "value": "Carpeta"
+        },
+        {
+          "value": "Kilo"
+        },
+        {
+          "value": "Playa"
+        },
+        {
+          "value": "Zancos"
+        },
+        {
+          "value": "Experimentar"
+        },
+        {
+          "value": "Feo"
+        },
+        {
+          "value": "Mapa"
+        },
+        {
+          "value": "Pescar"
+        },
+        {
+          "value": "Mar"
+        },
+        {
+          "value": "Tinta"
+        },
+        {
+          "value": "Bomba"
+        },
+        {
+          "value": "Delantal"
+        },
+        {
+          "value": "Golpe bajo"
+        },
+        {
+          "value": "Ajustar"
+        },
+        {
+          "value": "India"
+        },
+        {
+          "value": "Argentina"
+        },
+        {
+          "value": "Buenos Aires"
+        },
+        {
+          "value": "Segundero/cronometro"
+        },
+        {
+          "value": "Suspender"
+        },
+        {
+          "value": "Herramienta"
+        },
+        {
+          "value": "Masa"
+        },
+        {
+          "value": "Saltar/brincar"
+        },
+        {
+          "value": "Agua mineral"
+        },
+        {
+          "value": "Trineo"
+        },
+        {
+          "value": "Memorizar"
+        },
+        {
+          "value": "Kamikaze"
+        },
+        {
+          "value": "Nudo"
+        },
+        {
+          "value": "Tortugas ninjas"
+        },
+        {
+          "value": "Mezclar"
+        },
+        {
+          "value": "New York"
+        },
+        {
+          "value": "Sarampión"
+        },
+        {
+          "value": "Sombrero de fiesta"
+        },
+        {
+          "value": "Diez en punto"
+        },
+        {
+          "value": "Enfundar"
+        },
+        {
+          "value": "Hombre bestia"
+        },
+        {
+          "value": "Jeringa"
+        },
+        {
+          "value": "Naufrago"
+        },
+        {
+          "value": "Manco"
+        },
+        {
+          "value": "Fundir"
+        },
+        {
+          "value": "Soltero"
+        },
+        {
+          "value": "Salsa picante"
+        },
+        {
+          "value": "Cabeza"
+        },
+        {
+          "value": "Hielo"
+        },
+        {
+          "value": "Helio"
+        },
+        {
+          "value": "Alzar/levantar"
+        },
+        {
+          "value": "Cuerno"
+        },
+        {
+          "value": "Oficina"
+        },
+        {
+          "value": "Derrumbe"
+        },
+        {
+          "value": "Estimular"
+        },
+        {
+          "value": "Saxofon"
+        },
+        {
+          "value": "Registradora/caja registradora"
+        },
+        {
+          "value": "Bart Simpson"
+        },
+        {
+          "value": "Triciclo"
+        },
+        {
+          "value": "Vagón"
+        },
+        {
+          "value": "Cartél de alto"
+        },
+        {
+          "value": "Grafico"
+        },
+        {
+          "value": "Media hora"
+        },
+        {
+          "value": "Caballero"
+        },
+        {
+          "value": "Carretera/autopista"
+        },
+        {
+          "value": "Presidente"
+        },
+        {
+          "value": "Paralelo"
+        },
+        {
+          "value": "Parque de diversiones"
+        },
+        {
+          "value": "Extender"
+        },
+        {
+          "value": "Mujer maravilla"
+        },
+        {
+          "value": "Vestido de fiesta"
+        },
+        {
+          "value": "Punto y coma"
+        },
+        {
+          "value": "Si"
+        },
+        {
+          "value": "No"
+        },
+        {
+          "value": "Ebanista"
+        },
+        {
+          "value": "Ladrillo"
+        },
+        {
+          "value": "Anillos de humo"
+        },
+        {
+          "value": "Censura"
+        },
+        {
+          "value": "Puente colgante"
+        },
+        {
+          "value": "Salida de emergencia"
+        },
+        {
+          "value": "Pato de goma"
+        },
+        {
+          "value": "Museo"
+        },
+        {
+          "value": "Avión"
+        },
+        {
+          "value": "Compactador"
+        },
+        {
+          "value": "Arco de triunfo"
+        },
+        {
+          "value": "Pato lucas"
+        },
+        {
+          "value": "Chocolate"
+        },
+        {
+          "value": "Café"
+        },
+        {
+          "value": "Bongo"
+        },
+        {
+          "value": "Baño de hombres"
+        },
+        {
+          "value": "Pintar"
+        },
+        {
+          "value": "Negativo"
+        },
+        {
+          "value": "Miel"
+        },
+        {
+          "value": "Dormir"
+        },
+        {
+          "value": "Drogas"
+        },
+        {
+          "value": "Tornado"
+        },
+        {
+          "value": "Esculpir"
+        },
+        {
+          "value": "Rueda de carro"
+        },
+        {
+          "value": "Tobillo"
+        },
+        {
+          "value": "Motocicleta"
+        },
+        {
+          "value": "Atardecer"
+        },
+        {
+          "value": "Michael Jackson"
+        },
+        {
+          "value": "Mesa de pool"
+        },
+        {
+          "value": "Cortar leña"
+        },
+        {
+          "value": "Escalones"
+        },
+        {
+          "value": "Cielo"
+        },
+        {
+          "value": "Trebol de la suerte"
+        },
+        {
+          "value": "Hotel"
+        },
+        {
+          "value": "Codigo de área"
+        },
+        {
+          "value": "Fumar"
+        },
+        {
+          "value": "Fragil"
+        },
+        {
+          "value": "Kilometro"
+        },
+        {
+          "value": "Carpa"
+        },
+        {
+          "value": "Pastillas"
+        },
+        {
+          "value": "Comer"
+        },
+        {
+          "value": "Elastico"
+        },
+        {
+          "value": "Zapatos rotos"
+        },
+        {
+          "value": "Maratón"
+        },
+        {
+          "value": "Zanahoria"
+        },
+        {
+          "value": "Lavarropas"
+        },
+        {
+          "value": "Champagne"
+        },
+        {
+          "value": "Rompecabezas"
+        },
+        {
+          "value": "Peluquero"
+        },
+        {
+          "value": "Caballo de troya"
+        },
+        {
+          "value": "Ventana rota"
+        },
+        {
+          "value": "Edad media"
+        },
+        {
+          "value": "Locura"
+        },
+        {
+          "value": "Luchar"
+        },
+        {
+          "value": "Toro"
+        },
+        {
+          "value": "Lanzallamas"
+        },
+        {
+          "value": "Auto deportivo"
+        },
+        {
+          "value": "Magia"
+        },
+        {
+          "value": "Diablo"
+        },
+        {
+          "value": "Té"
+        },
+        {
+          "value": "Entrenar"
+        },
+        {
+          "value": "Tercer mundo"
+        },
+        {
+          "value": "Compartir"
+        },
+        {
+          "value": "Pianista"
+        },
+        {
+          "value": "Reloj de sol"
+        },
+        {
+          "value": "Hija"
+        },
+        {
+          "value": "Trompa"
+        },
+        {
+          "value": "Ropero"
+        },
+        {
+          "value": "Golpear"
+        },
+        {
+          "value": "Cinturón"
+        },
+        {
+          "value": "Evolución"
+        },
+        {
+          "value": "Ondular"
+        },
+        {
+          "value": "Albondiga"
+        },
+        {
+          "value": "Chimenea"
+        },
+        {
+          "value": "Remo"
+        },
+        {
+          "value": "Gobierno"
+        },
+        {
+          "value": "Iglú"
+        },
+        {
+          "value": "Niño jugando"
+        },
+        {
+          "value": "Borracho"
+        },
+        {
+          "value": "Corona"
+        },
+        {
+          "value": "Cueva"
+        },
+        {
+          "value": "Maradona"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "generos": [
+    {
+      "nombre": "Normal",
+      "listaTextoCarta": [
+        {
+          "value": "Tomás un trago"
+        },
+        {
+          "value": "Un beso a la persona que tenés en frente"
+        },
+        {
+          "value": "Repartis dos tragos"
+        },
+        {
+          "value": "Volvés a girar"
+        },
+        {
+          "value": "Volvés a girar"
+        },
+        {
+          "value": "Tomás tres tragos"
+        },
+        {
+          "value": "Tenés que decir un 'Yo Nunca'"
+        },
+        {
+          "value": "Repartís 6 tragos"
+        },
+        {
+          "value": "Te desafian a 'Verdad o Reto'"
+        },
+        {
+          "value": "Fondo blanco o volvé a girar"
+        },
+        {
+          "value": "Todos toman"
+        },
+        {
+          "value": "Toman las mujeres"
+        },
+        {
+          "value": "Toman los hombres"
+        },
+        {
+          "value": "Toma el de tu derecha"
+        },
+        {
+          "value": "Toma el de tu izquierda"
+        },
+        {
+          "value": "Regalas un fondo blanco"
+        }
+      ]
+    }
+  ]
+}
