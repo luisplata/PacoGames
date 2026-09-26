@@ -1,7 +1,7 @@
 name: CI + Release
+# Solo manual (workflow_dispatch): se dispara desde la pestaña Actions →
+# "Run workflow". NO automático por push — evitar abuso de releases/costos.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
