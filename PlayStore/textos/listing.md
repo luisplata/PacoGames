@@ -2,10 +2,10 @@
 
 > Borrador para revisión del usuario. NO enviado. Copy verbatim del proposal.
 
-## Título (21/30)
+## Título (22/30)
 **PACO: Juegos de Previa**
 
-## Short (71/80)
+## Short (70/80)
 **La previa en tu celu: Yo Nunca, Ruleta y Pictionary. Modo sin alcohol.**
 
 ## Full (~150 palabras, ≤4000)
