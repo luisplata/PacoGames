@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 /// Seam de audio (AH3): abstracción del reproductor real.
 ///
@@ -51,9 +52,13 @@ class ReproductorAudioplayers implements Reproductor {
   Future<AudioPool> _pool(String archivo) async {
     final existente = _pools[archivo];
     if (existente != null) return existente;
+    // BytesSource en vez de AssetSource: carga el asset con rootBundle y
+    // reproduce los bytes. Elimina el bug del doble-prefix 'assets/' de
+    // audioplayers en web (audio_cache._sanitizeURLForWeb agrega 'assets/'
+    // además del prefix → 404) y la dependencia del temp-file en Android.
+    final bytes = await rootBundle.load('assets/audio/$archivo.ogg');
     final pool = await AudioPool.create(
-      // A2: prefix default de AudioCache es 'assets/' → assets/audio/X.ogg.
-      source: AssetSource('audio/$archivo.ogg'),
+      source: BytesSource(bytes.buffer.asUint8List()),
       maxPlayers: 4,
       audioContext: contextoAndroid,
     );
