@@ -1,17 +1,41 @@
-# PacoGame
+# PacoGames
 
-Base Flutter project for PacoGame, scaffolded with a feature-first structure,
-Riverpod 3 for state/DI and go_router for navigation. No game features yet —
-this is the runnable foundation.
+Evolución de **PACO** (proyecto original en Unity) ahora reescrito en Flutter.
+Base Flutter con estructura feature-first, Riverpod 3 para estado/DI y go_router
+para navegación. Aún no hay features de juego — esta es la base ejecutable.
 
 **Quick start:**
 
 | Command (full SDK path — Flutter is NOT on PATH) | What it does |
 |---|---|
 | `C:\Users\luis_\flutter\bin\flutter pub get` | Install dependencies |
-| `C:\Users\luis_\flutter\bin\flutter run` | Run the app (pick android or web device) |
+| `C:\Users\luis_\flutter\bin\flutter run -d chrome` | Run on web (Chrome) |
 | `C:\Users\luis_\flutter\bin\flutter test` | Run the test suite |
 | `C:\Users\luis_\flutter\bin\flutter analyze` | Static analysis (must be 0 issues) |
+
+## Run on Web (para probar)
+
+Flutter no está en el PATH, así que usá la ruta completa del SDK.
+Desde la raíz del proyecto:
+
+```bash
+# Opción A: Chrome (recomendada — hot reload automático al guardar)
+C:/Users/luis_/flutter/bin/flutter run -d chrome
+
+# Opción B: servidor web + abrís el navegador que quieras
+C:/Users/luis_/flutter/bin/flutter run -d web-server --web-port=8080
+#   → después abrí http://localhost:8080 en cualquier navegador
+```
+
+> **Hot reload**: con Chrome, al guardar un archivo la app se actualiza sola
+> (apretá `r` en la terminal para recargar, `R` para hot restart completo).
+
+Si solo querés un build estático (sin servidor de desarrollo):
+
+```bash
+C:/Users/luis_/flutter/bin/flutter build web
+#   → el resultado queda en build/web/, servilo con cualquier web server estático
+```
 
 ## Prerequisites
 
@@ -31,10 +55,11 @@ C:/Users/luis_/flutter/bin/flutter pub get
 # 2. Verify the environment (Android toolchain green)
 C:/Users/luis_/flutter/bin/flutter doctor -v
 
-# 3. Run the app
-C:/Users/luis_/flutter/bin/flutter run
-#   - press "1" to open on an Android device/emulator
-#   - press "2" to open on Chrome (web)
+# 3. Run the app on web
+C:/Users/luis_/flutter/bin/flutter run -d chrome
+#   → se abre Chrome con la app; hot reload al guardar
+#   → para Android (emulador/dispositivo conectado):
+#     C:/Users/luis_/flutter/bin/flutter run -d <device-id>
 ```
 
 ## Tests
