@@ -47,11 +47,14 @@ jobs:
       - name: Extract version
         id: version
         run: RUN_NUMBER=${{ github.run_number }} bash scripts/release-info.sh >> "$GITHUB_OUTPUT"
-      - run: flutter build apk --debug
+      # APK release firmado con el keystore debug del template (build.gradle.kts
+      # release signingConfig = debug): instalable sin secrets y ~5x más chico
+      # que el debug build. Play Store real = appbundle + keystore propio (follow-up).
+      - run: flutter build apk --release
       - run: flutter build web
       - name: Package artifacts
         run: |
-          cp build/app/outputs/flutter-apk/app-debug.apk "${{ steps.version.outputs.APK_NAME }}"
+          cp build/app/outputs/flutter-apk/app-release.apk "${{ steps.version.outputs.APK_NAME }}"
           cd build/web && zip -r "$GITHUB_WORKSPACE/${{ steps.version.outputs.ZIP_NAME }}" .
       - uses: softprops/action-gh-release@v2
         with:
