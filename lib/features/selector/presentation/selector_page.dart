@@ -7,7 +7,7 @@ import '../../../core/contenido/diagnostico.dart';
 /// Datos fijos de las 3 tarjetas del selector.
 ///
 /// [ruta] no nula = juego jugable (navega con push); `null` = aún no
-/// implementado (SnackBar 'Próximamente (M3)').
+/// implementado (SnackBar 'Próximamente').
 /// [imagen] no nulo = leading con arte propio (reemplaza al ícono).
 class _JuegoInfo {
   const _JuegoInfo(
@@ -43,11 +43,18 @@ const _juegos = [
     'Girás y te toca',
     '/ruleta',
   ),
-  _JuegoInfo('pictionary', 'Pictionary', Icons.brush_outlined, 'Dibujá y adiviná', null),
+  _JuegoInfo(
+    'pictionary',
+    'Pictionary',
+    Icons.brush_outlined,
+    'Dibujá y adiviná',
+    '/pictionary',
+    imagen: 'assets/images/pictionary_selector.png',
+  ),
 ];
 
 /// Selector de juegos: 3 tarjetas fijas. Sin cartas válidas → "sin contenido"
-/// y no entra; con contenido → navega (Yo Nunca / Ruleta) o SnackBar M3.
+/// y no entra; con contenido → navega (Yo Nunca / Ruleta / Pictionary).
 class SelectorPage extends ConsumerWidget {
   const SelectorPage({super.key});
 

@@ -48,7 +48,12 @@ Widget appConOverrides({
                 ),
                 'pictionary': const ContenidoJuego(
                   juegoId: 'pictionary',
-                  generos: [Genero(nombre: 'Normal', cartas: ['D'])],
+                  generos: [
+                    Genero(
+                      nombre: 'Normal',
+                      cartas: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'],
+                    ),
+                  ],
                 ),
               },
               errores: errores,

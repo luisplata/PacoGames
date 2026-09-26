@@ -45,15 +45,17 @@ void main() {
       expect(find.textContaining('Próximamente'), findsNothing);
     });
 
-    testWidgets('Pictionary → SnackBar "Próximamente (M3)"', (tester) async {
+    testWidgets('Pictionary navega a /pictionary (sin snackbar)', (tester) async {
       await arrancarApp(tester, splashVisto: true);
       await navegarDesdeHome(tester, 'Jugar');
 
       await tester.tap(find.text('Pictionary'));
       await tester.pumpAndSettle();
-      expect(find.text('Próximamente (M3)'), findsOneWidget);
-      // Seguimos en el selector.
-      expect(find.text('Pictionary'), findsOneWidget);
+
+      // Instrucciones de Pictionary visibles; NO hay snackbar.
+      expect(find.text('Pasá el teléfono: el dibujante elige una de 3 palabras en secreto'),
+          findsOneWidget);
+      expect(find.textContaining('Próximamente'), findsNothing);
     });
 
     testWidgets('juego sin cartas → badge "sin contenido" y no entra',
