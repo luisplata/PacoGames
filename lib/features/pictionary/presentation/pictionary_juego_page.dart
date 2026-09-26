@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ajustes/ajustes.dart';
 import '../../../core/ajustes/ajustes_providers.dart';
+import '../../../core/audio/sonido_provider.dart';
 import '../../../core/contenido/diagnostico.dart';
 import '../../../core/contenido/entidades.dart';
 import '../../../core/contenido/generos_visibles.dart';
@@ -119,6 +120,8 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
   /// Pase → elegir: el sorteo ocurre AL ENTRAR a la fase elegir y las 3
   /// opciones se consumen al instante (el dibujante las vio, P1).
   void _continuar() {
+    // AH6: click en [Continuar].
+    ref.read(sonidoServicioProvider).reproducirClick();
     setState(() => _fase = _Fase.elegir);
     ref.read(sesionPictionaryProvider.notifier).sortearPalabras();
   }
@@ -134,6 +137,9 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
 
   /// [¡Adivinado!] → resultado "¿Quién adivinó?" (timer pausado).
   void _adivinar() {
+    // AH6: acierto → fanfarria + háptico pesado.
+    ref.read(sonidoServicioProvider).reproducirFanfarria();
+    ref.read(hapticosServicioProvider).acierto();
     ref.read(pictionaryCronometroProvider.notifier).pausar();
     setState(() {
       _fase = _Fase.resultado;
@@ -143,6 +149,8 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
 
   /// [Equipo A]/[Equipo B]: punto + siguiente dibujante + nueva ronda.
   void _asignarPunto(bool equipoA) {
+    // AH6: click en [Equipo A]/[Equipo B].
+    ref.read(sonidoServicioProvider).reproducirClick();
     final notifier = ref.read(sesionPictionaryProvider.notifier);
     if (equipoA) {
       notifier.puntoA();
@@ -161,6 +169,8 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
 
   /// [Siguiente dibujante] (fin de tiempo): turno pasa SIN punto (P5/P6).
   void _siguienteDibujante() {
+    // AH6: click en [Siguiente dibujante].
+    ref.read(sonidoServicioProvider).reproducirClick();
     final notifier = ref.read(sesionPictionaryProvider.notifier);
     notifier.siguienteDibujante();
     notifier.nuevaRonda();
@@ -201,6 +211,16 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
     // Fin de tiempo (P5): al llegar a 0 el notifier auto-cancela el timer y
     // este listener mueve la UI al resultado "Nadie suma".
     ref.listen(pictionaryCronometroProvider, (prev, next) {
+      // AH6: tick + háptico de timer en los últimos 10 s, solo en ronda y
+      // solo cuando el segundo REALMENTE decrementó (pausa/reanudar no
+      // cambian segundosRestantes → 0 falsos ticks; 0 no suena).
+      if (next.segundosRestantes != prev?.segundosRestantes &&
+          next.segundosRestantes <= 10 &&
+          next.segundosRestantes > 0 &&
+          _fase == _Fase.ronda) {
+        ref.read(sonidoServicioProvider).reproducirTick();
+        ref.read(hapticosServicioProvider).tickTimer();
+      }
       if (next.terminado && _fase == _Fase.ronda) {
         setState(() {
           _fase = _Fase.resultado;
@@ -240,7 +260,7 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset('assets/images/fondo_madera2.png', fit: BoxFit.cover),
+            Image.asset('assets/images/fondo_madera2.webp', fit: BoxFit.cover),
             ColoredBox(color: Colors.black.withValues(alpha: .35)),
             SafeArea(
               child: Column(
@@ -407,7 +427,7 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
                   child: Row(
                     children: [
                       Image.asset(
-                        'assets/images/pictionary_carta.png',
+                        'assets/images/pictionary_carta.webp',
                         height: 48,
                         fit: BoxFit.contain,
                       ),
@@ -446,7 +466,7 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
               children: [
                 Positioned.fill(
                   child: Image.asset(
-                    'assets/images/pictionary_carta.png',
+                    'assets/images/pictionary_carta.webp',
                     fit: BoxFit.contain,
                   ),
                 ),

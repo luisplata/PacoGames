@@ -8,7 +8,7 @@ void main() {
     testWidgets('muestra 3 botones y la versión', (tester) async {
       await arrancarApp(tester, splashVisto: true);
 
-      expect(find.text('PacoGame'), findsOneWidget);
+      expect(find.text('PacoGames'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Jugar'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Cómo se juega'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Ajustes'), findsOneWidget);

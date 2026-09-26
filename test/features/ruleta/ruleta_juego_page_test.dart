@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
-import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-import 'package:paco_game/app/app.dart';
-import 'package:paco_game/app/boot.dart';
-import 'package:paco_game/core/ajustes/ajustes_providers.dart';
-import 'package:paco_game/core/ajustes/ajustes_repository.dart';
-import 'package:paco_game/core/contenido/diagnostico.dart';
 import 'package:paco_game/core/contenido/entidades.dart';
+
+import '../helpers.dart';
 
 const _resultadoKey = Key('resultado_ruleta');
 const _bannerRuleta = 'Modo sin alcohol: trago = punto/prenda';
@@ -30,52 +23,22 @@ DiagnosticoContenido diagRuleta(List<Genero> generos) => DiagnosticoContenido(
       errores: const [],
     );
 
-/// Arranca la app con prefs in-memory pre-sembradas (permite modoAlcohol
-/// inicial sin pasar por la UI de Ajustes).
-Future<void> arrancarConAjustes(
-  WidgetTester tester, {
-  required bool splashVisto,
-  required bool modoAlcohol,
-  DiagnosticoContenido? diagnostico,
-}) async {
-  SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
-  final prefs = SharedPreferencesAsync();
-  await prefs.setInt('ajustes.schemaVersion', 1);
-  await prefs.setBool('ajustes.splashVisto', splashVisto);
-  await prefs.setBool('ajustes.modoAlcohol', modoAlcohol);
-  await prefs.setBool('ajustes.sonido', true);
-  await prefs.setBool('ajustes.vibracion', true);
-
-  final bridge = BootBridge()
-    ..actualizar(splashVisto: splashVisto, errores: const []);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        bootBridgeProvider.overrideWithValue(bridge),
-        ajustesRepositoryProvider.overrideWithValue(
-          AjustesRepository(prefs: prefs),
-        ),
-        diagnosticoContenidoProvider.overrideWith(
-          (ref) async => diagnostico ?? diagRuleta([_normalUnico]),
-        ),
-      ],
-      child: const App(),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
-
 /// Camino real: home → selector → Ruleta (instrucciones) → [Jugar] → juego.
-Future<void> irAlJuego(
+/// Con fakes de audio/hápticos (seam AH3) — devuelve los fakes.
+Future<FakesAudio> irAlJuego(
   WidgetTester tester, {
   bool modoAlcohol = false,
+  bool sonido = true,
+  bool vibracion = true,
   DiagnosticoContenido? diagnostico,
 }) async {
-  await arrancarConAjustes(
+  final fakes = await arrancarConAudio(
     tester,
     splashVisto: true,
     modoAlcohol: modoAlcohol,
-    diagnostico: diagnostico,
+    sonido: sonido,
+    vibracion: vibracion,
+    diagnostico: diagnostico ?? diagRuleta([_normalUnico]),
   );
   await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
   await tester.pumpAndSettle();
@@ -86,6 +49,7 @@ Future<void> irAlJuego(
   await tester.pumpAndSettle();
   await tester.tap(jugar);
   await tester.pumpAndSettle();
+  return fakes;
 }
 
 /// Toca [Girar] y completa la animación (pump + 3 s + 100 ms + pump reveal).
@@ -150,6 +114,31 @@ void main() {
       expect(find.widgetWithText(FilledButton, 'Siguiente'), findsOneWidget);
       final re = tester.widget<FilledButton>(girar);
       expect(re.onPressed, isNotNull);
+    });
+
+    testWidgets('[Girar] → giro; onEnd → fanfarria + ruletaFrenar; '
+        '[Siguiente] → click (AH6)', (tester) async {
+      final fakes = await irAlJuego(tester);
+      await girarYEsperar(tester);
+
+      // Giro al arrancar + fanfarria al frenar + háptico medio.
+      expect(fakes.reproductor.llamadas, ['giro', 'fanfarria']);
+      expect(fakes.vibrador.llamadas, ['ruletaFrenar']);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
+      await tester.pumpAndSettle();
+      expect(fakes.reproductor.llamadas, ['giro', 'fanfarria', 'click']);
+    });
+
+    testWidgets('sonido=false y vibracion=false → 0 llamadas a audio y '
+        'hápticos (AH4/AH5/A2)', (tester) async {
+      final fakes = await irAlJuego(tester, sonido: false, vibracion: false);
+      await girarYEsperar(tester);
+      await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
+      await tester.pumpAndSettle();
+
+      expect(fakes.reproductor.llamadas, isEmpty);
+      expect(fakes.vibrador.llamadas, isEmpty);
     });
 
     testWidgets('pass-turn: aviso exacto tras reveal, sin re-giro automático',

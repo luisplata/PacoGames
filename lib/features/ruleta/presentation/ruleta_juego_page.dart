@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ajustes/ajustes.dart';
 import '../../../core/ajustes/ajustes_providers.dart';
+import '../../../core/audio/sonido_provider.dart';
 import '../../../core/contenido/diagnostico.dart';
 import '../../../core/contenido/entidades.dart';
 import '../../../core/contenido/generos_visibles.dart';
@@ -88,6 +89,8 @@ class _RuletaJuegoPageState extends ConsumerState<RuletaJuegoPage> {
   /// secciones × 22,5°; si el arte no coincide, el texto sigue siendo la
   /// verdad. Cartas vacías → no-op defensivo (0 géneros nunca llega acá).
   void _girar() {
+    // AH6: giro al arrancar la animación (gated por ajustes.sonido).
+    ref.read(sonidoServicioProvider).reproducirGiro();
     setState(() => _girando = true);
     ref.read(ruletaProvider.notifier).girar();
     final girada = ref.read(ruletaProvider);
@@ -144,7 +147,7 @@ class _RuletaJuegoPageState extends ConsumerState<RuletaJuegoPage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset('assets/images/fondo_madera2.png', fit: BoxFit.cover),
+            Image.asset('assets/images/fondo_madera2.webp', fit: BoxFit.cover),
             ColoredBox(color: Colors.black.withValues(alpha: .35)),
             SafeArea(
               child: Column(
@@ -257,10 +260,13 @@ class _RuletaJuegoPageState extends ConsumerState<RuletaJuegoPage> {
                     duration: const Duration(seconds: 3),
                     curve: Curves.easeOutQuart,
                     onEnd: () {
+                      // AH6: la ruleta frenó → fanfarria + háptico medio.
+                      ref.read(sonidoServicioProvider).reproducirFanfarria();
+                      ref.read(hapticosServicioProvider).ruletaFrenar();
                       if (mounted) setState(() => _girando = false);
                     },
                     child: Image.asset(
-                      'assets/images/ruleta_rueda.png',
+                      'assets/images/ruleta_rueda.webp',
                       width: 240,
                       height: 240,
                       fit: BoxFit.contain,
@@ -303,7 +309,11 @@ class _RuletaJuegoPageState extends ConsumerState<RuletaJuegoPage> {
             ],
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: () => ref.read(ruletaProvider.notifier).siguiente(),
+              onPressed: () {
+                // AH6: click en [Siguiente].
+                ref.read(sonidoServicioProvider).reproducirClick();
+                ref.read(ruletaProvider.notifier).siguiente();
+              },
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
               ),

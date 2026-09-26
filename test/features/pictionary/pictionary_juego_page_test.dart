@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
-import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-import 'package:paco_game/app/app.dart';
-import 'package:paco_game/app/boot.dart';
-import 'package:paco_game/core/ajustes/ajustes_providers.dart';
-import 'package:paco_game/core/ajustes/ajustes_repository.dart';
-import 'package:paco_game/core/contenido/diagnostico.dart';
 import 'package:paco_game/core/contenido/entidades.dart';
+
+import '../helpers.dart';
 
 const _timerKey = Key('timer_pictionary');
 const _marcadorKey = Key('marcador_pictionary');
@@ -34,45 +27,23 @@ DiagnosticoContenido diagPictionary(List<Genero> generos) =>
       errores: const [],
     );
 
-/// Arranca la app con prefs in-memory pre-sembradas.
-Future<void> arrancarConAjustes(
-  WidgetTester tester, {
-  required bool splashVisto,
-  DiagnosticoContenido? diagnostico,
-}) async {
-  SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
-  final prefs = SharedPreferencesAsync();
-  await prefs.setInt('ajustes.schemaVersion', 1);
-  await prefs.setBool('ajustes.splashVisto', splashVisto);
-  await prefs.setBool('ajustes.modoAlcohol', false);
-  await prefs.setBool('ajustes.sonido', true);
-  await prefs.setBool('ajustes.vibracion', true);
-
-  final bridge = BootBridge()
-    ..actualizar(splashVisto: splashVisto, errores: const []);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        bootBridgeProvider.overrideWithValue(bridge),
-        ajustesRepositoryProvider.overrideWithValue(
-          AjustesRepository(prefs: prefs),
-        ),
-        diagnosticoContenidoProvider.overrideWith(
-          (ref) async => diagnostico ?? diagPictionary([_normalUnico]),
-        ),
-      ],
-      child: const App(),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
-
 /// Camino real: home → selector → Pictionary (instrucciones) → [Jugar] → juego.
-Future<void> irAlJuego(
+/// Con fakes de audio/hápticos (seam AH3) — devuelve los fakes.
+Future<FakesAudio> irAlJuego(
   WidgetTester tester, {
+  bool modoAlcohol = false,
+  bool sonido = true,
+  bool vibracion = true,
   DiagnosticoContenido? diagnostico,
 }) async {
-  await arrancarConAjustes(tester, splashVisto: true, diagnostico: diagnostico);
+  final fakes = await arrancarConAudio(
+    tester,
+    splashVisto: true,
+    modoAlcohol: modoAlcohol,
+    sonido: sonido,
+    vibracion: vibracion,
+    diagnostico: diagnostico ?? diagPictionary([_normalUnico]),
+  );
   await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Pictionary'));
@@ -82,6 +53,7 @@ Future<void> irAlJuego(
   await tester.pumpAndSettle();
   await tester.tap(jugar);
   await tester.pumpAndSettle();
+  return fakes;
 }
 
 /// Avanza pase → elegir (el sorteo ocurre al entrar a elegir).
@@ -199,6 +171,78 @@ void main() {
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Siguiente dibujante'));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('countdown ≤10s → 1 tick + 1 tickTimer por segundo; nada por '
+      'encima de 10 ni en 0 (AH6)', (tester) async {
+    final fakes = await irAlJuego(tester);
+    await entrarARonda(tester);
+
+    // Por encima de 10s: 0 ticks (guard del diseño A7).
+    await tester.pump(const Duration(seconds: 49)); // 60 → 11
+    expect(fakes.reproductor.llamadas.where((l) => l == 'tick'), isEmpty);
+    expect(fakes.vibrador.llamadas, isEmpty);
+
+    // 11 → 10: primer tick.
+    await tester.pump(const Duration(seconds: 1));
+    expect(fakes.reproductor.llamadas.where((l) => l == 'tick'), hasLength(1));
+
+    // 10 → 1: 9 ticks más (10 en total), 1 por segundo.
+    for (var i = 0; i < 9; i++) {
+      await tester.pump(const Duration(seconds: 1));
+    }
+    expect(fakes.reproductor.llamadas.where((l) => l == 'tick'), hasLength(10));
+    expect(
+      fakes.vibrador.llamadas.where((l) => l == 'tickTimer'),
+      hasLength(10),
+    );
+
+    // 1 → 0: no suena (0 no es > 0) y termina la ronda (D11: timer cancelado).
+    await tester.pump(const Duration(seconds: 1));
+    expect(fakes.reproductor.llamadas.where((l) => l == 'tick'), hasLength(10));
+    expect(find.text('¡Se acabó el tiempo! Nadie suma'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Siguiente dibujante'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('[¡Adivinado!] → fanfarria + acierto; [Equipo A] → click (AH6)',
+      (tester) async {
+    final fakes = await irAlJuego(tester);
+    await entrarARonda(tester);
+
+    await tester.tap(find.widgetWithText(FilledButton, '¡Adivinado!'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('¿Quién adivinó?'), findsOneWidget);
+    // ['click' (Continuar)] + ['fanfarria' (¡Adivinado!)].
+    expect(fakes.reproductor.llamadas, ['click', 'fanfarria']);
+    expect(fakes.vibrador.llamadas, ['acierto']);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Equipo A'));
+    await tester.pumpAndSettle();
+    expect(fakes.reproductor.llamadas, ['click', 'fanfarria', 'click']);
+  });
+
+  testWidgets('sonido=false y vibracion=false → 0 llamadas a audio y hápticos '
+      'en partida completa (countdown + adivinado) (AH4/AH5/A2)',
+      (tester) async {
+    final fakes = await irAlJuego(tester, sonido: false, vibracion: false);
+
+    // Ronda completa: countdown a 0 (60 ticks de timer) + [¡Adivinado!].
+    await entrarARonda(tester);
+    await tester.pump(const Duration(seconds: 60));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Siguiente dibujante'));
+    await tester.pumpAndSettle();
+
+    await entrarARonda(tester);
+    await tester.tap(find.widgetWithText(FilledButton, '¡Adivinado!'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Equipo A'));
+    await tester.pumpAndSettle();
+
+    expect(fakes.reproductor.llamadas, isEmpty);
+    expect(fakes.vibrador.llamadas, isEmpty);
   });
 
   testWidgets('fin de tiempo: "¡Se acabó el tiempo! Nadie suma" → '
@@ -461,39 +505,11 @@ void main() {
   testWidgets('0 géneros visibles (solo Picante + modoAlcohol) → defensivo',
       (tester) async {
     // modoAlcohol=true filtra Picante → 0 visibles.
-    SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
-    final prefs = SharedPreferencesAsync();
-    await prefs.setInt('ajustes.schemaVersion', 1);
-    await prefs.setBool('ajustes.splashVisto', true);
-    await prefs.setBool('ajustes.modoAlcohol', true);
-    await prefs.setBool('ajustes.sonido', true);
-    await prefs.setBool('ajustes.vibracion', true);
-    final bridge = BootBridge()
-      ..actualizar(splashVisto: true, errores: const []);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          bootBridgeProvider.overrideWithValue(bridge),
-          ajustesRepositoryProvider.overrideWithValue(
-            AjustesRepository(prefs: prefs),
-          ),
-          diagnosticoContenidoProvider.overrideWith(
-            (ref) async => diagPictionary([_soloPicante]),
-          ),
-        ],
-        child: const App(),
-      ),
+    await irAlJuego(
+      tester,
+      modoAlcohol: true,
+      diagnostico: diagPictionary([_soloPicante]),
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Pictionary'));
-    await tester.pumpAndSettle();
-    final jugar = find.widgetWithText(FilledButton, 'Jugar');
-    await tester.ensureVisible(jugar);
-    await tester.pumpAndSettle();
-    await tester.tap(jugar);
-    await tester.pumpAndSettle();
 
     expect(find.text('Sin géneros disponibles en este modo'), findsOneWidget);
     expect(find.text('Elegí un género'), findsNothing);

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ajustes/ajustes.dart';
 import '../../../core/ajustes/ajustes_providers.dart';
+import '../../../core/audio/sonido_provider.dart';
 import '../../../core/contenido/diagnostico.dart';
 import '../../../core/contenido/entidades.dart';
 import '../../../core/contenido/generos_visibles.dart';
@@ -88,6 +89,18 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     final ajustes = ref.watch(ajustesProvider);
     final modoAlcohol = ajustes.value?.modoAlcohol ?? false;
 
+    // Carta al revelar (AH6/A6): el mazo es dominio puro; el listen cubre
+    // el reveal manual Y el auto-select (una carta SÍ se revela al elegir
+    // género). Gated por ajustes.sonido vía el servicio.
+    ref.listen(yoNuncaMazoProvider, (prev, next) {
+      final generoSeleccionado = ref.read(yoNuncaGeneroProvider);
+      if (generoSeleccionado != null &&
+          next.cartaActual != null &&
+          next.cartaActual != prev?.cartaActual) {
+        ref.read(sonidoServicioProvider).reproducirCarta();
+      }
+    });
+
     final visibles = generosVisibles(
       diagnostico.value?.contenidos['yo_nunca']?.generos ?? const <Genero>[],
       modoAlcohol: modoAlcohol,
@@ -123,7 +136,7 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset('assets/images/fondo_madera2.png', fit: BoxFit.cover),
+            Image.asset('assets/images/fondo_madera2.webp', fit: BoxFit.cover),
             ColoredBox(color: Colors.black.withValues(alpha: .35)),
             SafeArea(
               child: Column(
@@ -233,7 +246,11 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: notifier.remezclar,
+                onPressed: () {
+                  // AH6: click en [Mezclar de nuevo].
+                  ref.read(sonidoServicioProvider).reproducirClick();
+                  notifier.remezclar();
+                },
                 child: const Text('Mezclar de nuevo'),
               ),
             ],
@@ -252,8 +269,8 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
         children: [
           Image.asset(
             genero == 'Picante'
-                ? 'assets/images/carta_picante.png'
-                : 'assets/images/carta_normal.png',
+                ? 'assets/images/carta_picante.webp'
+                : 'assets/images/carta_normal.webp',
             height: 180,
             fit: BoxFit.contain,
           ),
@@ -280,7 +297,11 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
           ],
           const SizedBox(height: 32),
           FilledButton(
-            onPressed: notifier.siguiente,
+            onPressed: () {
+              // AH6: click en [Siguiente].
+              ref.read(sonidoServicioProvider).reproducirClick();
+              notifier.siguiente();
+            },
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
             ),

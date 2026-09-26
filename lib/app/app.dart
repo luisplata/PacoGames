@@ -10,7 +10,7 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'PacoGame',
+      title: 'PacoGames',
       theme: appTheme,
       routerConfig: ref.watch(routerProvider),
     );

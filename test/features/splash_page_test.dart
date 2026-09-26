@@ -20,7 +20,7 @@ void main() {
         (tester) async {
       await arrancarApp(tester, splashVisto: false);
 
-      expect(find.text('PacoGame'), findsOneWidget);
+      expect(find.text('PacoGames'), findsOneWidget);
       expect(find.textContaining('18'), findsOneWidget);
       expect(find.textContaining('alcohol'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Entendido'), findsOneWidget);

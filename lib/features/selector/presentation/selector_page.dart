@@ -6,8 +6,7 @@ import '../../../core/contenido/diagnostico.dart';
 
 /// Datos fijos de las 3 tarjetas del selector.
 ///
-/// [ruta] no nula = juego jugable (navega con push); `null` = aún no
-/// implementado (SnackBar 'Próximamente').
+/// [ruta] = ruta de navegación del juego (jugable: navega con push).
 /// [imagen] no nulo = leading con arte propio (reemplaza al ícono).
 class _JuegoInfo {
   const _JuegoInfo(
@@ -23,7 +22,7 @@ class _JuegoInfo {
   final String nombre;
   final IconData icono;
   final String descripcion;
-  final String? ruta;
+  final String ruta;
   final String? imagen;
 }
 
@@ -34,7 +33,7 @@ const _juegos = [
     Icons.help_outline,
     '¿Quién lo hizo?',
     '/yo-nunca',
-    imagen: 'assets/images/yo_nunca_selector.png',
+    imagen: 'assets/images/yo_nunca_selector.webp',
   ),
   _JuegoInfo(
     'ruleta',
@@ -49,7 +48,7 @@ const _juegos = [
     Icons.brush_outlined,
     'Dibujá y adiviná',
     '/pictionary',
-    imagen: 'assets/images/pictionary_selector.png',
+    imagen: 'assets/images/pictionary_selector.webp',
   ),
 ];
 
@@ -105,18 +104,9 @@ class _TarjetaJuego extends StatelessWidget {
         enabled: tieneCartas,
         onTap: tieneCartas
             ? () {
-                final ruta = juego.ruta;
-                if (ruta != null) {
-                  // Yo Nunca y Ruleta son jugables: push preserva el
-                  // back-stack (la salida mid-game necesita confirmación).
-                  context.push(ruta);
-                } else {
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      const SnackBar(content: Text('Próximamente (M3)')),
-                    );
-                }
+                // Los 3 juegos son jugables: push preserva el back-stack
+                // (la salida mid-game necesita confirmación).
+                context.push(juego.ruta);
               }
             : null,
       ),

@@ -18,7 +18,7 @@ class YoNuncaInstruccionesPage extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset('assets/images/wallpaper_1.jpg', fit: BoxFit.cover),
+          Image.asset('assets/images/wallpaper_1.webp', fit: BoxFit.cover),
           ColoredBox(color: Colors.black.withValues(alpha: .35)),
           SafeArea(
             child: Column(
@@ -37,7 +37,7 @@ class YoNuncaInstruccionesPage extends StatelessWidget {
                     child: Column(
                       children: [
                         Image.asset(
-                          'assets/images/logo_paco.png',
+                          'assets/images/logo_paco.webp',
                           height: 120,
                         ),
                         const SizedBox(height: 16),

@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
-import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-import 'package:paco_game/app/app.dart';
-import 'package:paco_game/app/boot.dart';
-import 'package:paco_game/core/ajustes/ajustes_providers.dart';
-import 'package:paco_game/core/ajustes/ajustes_repository.dart';
-import 'package:paco_game/core/contenido/diagnostico.dart';
 import 'package:paco_game/core/contenido/entidades.dart';
+
+import '../helpers.dart';
 
 const _normal = Genero(nombre: 'Normal', cartas: ['N1', 'N2', 'N3']);
 const _picante = Genero(nombre: 'Picante', cartas: ['P1', 'P2']);
@@ -34,58 +27,30 @@ const _fraseKey = Key('frase_yo_nunca');
 const _bannerTexto = 'Modo sin alcohol: los tragos se leen como prendas';
 const _cartasNormales = ['N1', 'N2', 'N3'];
 
-/// Arranca la app con prefs in-memory pre-sembradas (permite modoAlcohol
-/// inicial sin pasar por la UI de Ajustes).
-Future<void> arrancarConAjustes(
-  WidgetTester tester, {
-  required bool splashVisto,
-  required bool modoAlcohol,
-  DiagnosticoContenido? diagnostico,
-}) async {
-  SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
-  final prefs = SharedPreferencesAsync();
-  await prefs.setInt('ajustes.schemaVersion', 1);
-  await prefs.setBool('ajustes.splashVisto', splashVisto);
-  await prefs.setBool('ajustes.modoAlcohol', modoAlcohol);
-  await prefs.setBool('ajustes.sonido', true);
-  await prefs.setBool('ajustes.vibracion', true);
-
-  final bridge = BootBridge()
-    ..actualizar(splashVisto: splashVisto, errores: const []);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        bootBridgeProvider.overrideWithValue(bridge),
-        ajustesRepositoryProvider.overrideWithValue(
-          AjustesRepository(prefs: prefs),
-        ),
-        diagnosticoContenidoProvider.overrideWith(
-          (ref) async => diagnostico ?? _diagnosticoFake,
-        ),
-      ],
-      child: const App(),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
-
 /// Camino real: home → selector → Yo Nunca (instrucciones) → [Jugar] → juego.
-Future<void> irAlJuego(
+/// Con fakes de audio/hápticos (seam AH3) — devuelve los fakes para
+/// assertar llamadas de SFX/hápticos.
+Future<FakesAudio> irAlJuego(
   WidgetTester tester, {
   bool modoAlcohol = false,
+  bool sonido = true,
+  bool vibracion = true,
   DiagnosticoContenido? diagnostico,
 }) async {
-  await arrancarConAjustes(
+  final fakes = await arrancarConAudio(
     tester,
     splashVisto: true,
     modoAlcohol: modoAlcohol,
-    diagnostico: diagnostico,
+    sonido: sonido,
+    vibracion: vibracion,
+    diagnostico: diagnostico ?? _diagnosticoFake,
   );
   await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Yo Nunca'));
   await tester.pumpAndSettle();
   await tocarBoton(tester, 'Jugar'); // [Jugar] de instrucciones → /yo-nunca/juego
+  return fakes;
 }
 
 /// Toca un FilledButton asegurando que esté visible (los botones de la
@@ -187,6 +152,47 @@ void main() {
       // Sigue jugando en el nuevo ciclo.
       await tocarBoton(tester, 'Siguiente');
       expect(_cartasNormales, contains(fraseActual(tester)));
+    });
+
+    testWidgets('[Siguiente]/[Mezclar de nuevo] → click; revelar carta → carta '
+        '(AH6)', (tester) async {
+      final fakes = await irAlJuego(tester);
+      await tester.tap(find.text('Normal'));
+      await tester.pumpAndSettle();
+
+      // Auto-reveal al elegir género: el mazo se construye con cartaActual.
+      expect(fakes.reproductor.llamadas, ['carta']);
+
+      await tocarBoton(tester, 'Siguiente');
+      expect(fakes.reproductor.llamadas.where((l) => l == 'click'), hasLength(1));
+      expect(fakes.reproductor.llamadas.where((l) => l == 'carta'), hasLength(2));
+
+      // Agotar (2 siguientes más) y mezclar: click + carta nueva.
+      for (var i = 0; i < 2; i++) {
+        await tocarBoton(tester, 'Siguiente');
+      }
+      expect(find.text('Se acabaron las cartas: se mezclan de nuevo'),
+          findsOneWidget);
+      await tocarBoton(tester, 'Mezclar de nuevo');
+      expect(fakes.reproductor.llamadas.where((l) => l == 'click'), hasLength(4));
+      expect(fakes.reproductor.llamadas.where((l) => l == 'carta'), hasLength(4));
+    });
+
+    testWidgets('sonido=false y vibracion=false → 0 llamadas a audio y '
+        'hápticos en toda la partida (AH4/AH5/A2)', (tester) async {
+      final fakes = await irAlJuego(tester, sonido: false, vibracion: false);
+      await tester.tap(find.text('Normal'));
+      await tester.pumpAndSettle();
+
+      for (var i = 0; i < 3; i++) {
+        await tocarBoton(tester, 'Siguiente');
+      }
+      expect(find.text('Se acabaron las cartas: se mezclan de nuevo'),
+          findsOneWidget);
+      await tocarBoton(tester, 'Mezclar de nuevo');
+
+      expect(fakes.reproductor.llamadas, isEmpty);
+      expect(fakes.vibrador.llamadas, isEmpty);
     });
 
     testWidgets('salir mid-game → diálogo → cancelar conserva / confirmar descarta',
