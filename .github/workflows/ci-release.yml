@@ -56,8 +56,10 @@ jobs:
           # tr -cd 'A-Za-z0-9+/=': descarta TODO lo que no sea base64
           # (newlines, headers, espacios que se cuelan al pegar secrets).
           echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -cd 'A-Za-z0-9+/=' | base64 --decode > android/app/upload-keystore.jks
-          printf '%s' "${{ secrets.KEY_PROPERTIES }}" > android/key.properties
-          ls -la android/app/upload-keystore.jks
+          # KEY_PROPERTIES_B64 (base64 del key.properties): evita que bash
+          # expanda caracteres como $#/$z que rompen la password.
+          echo "${{ secrets.KEY_PROPERTIES_B64 }}" | tr -cd 'A-Za-z0-9+/=' | base64 --decode > android/key.properties
+          ls -la android/app/upload-keystore.jks android/key.properties
           test -s android/app/upload-keystore.jks && echo "keystore decodificado OK"
       - run: flutter build apk --release
       - run: flutter build appbundle --release
