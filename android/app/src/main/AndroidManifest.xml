@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- ID de publicidad: requerido por la declaración de Play Console.
+         Al incluir publicidad en el futuro, el permiso AD_ID debe estar
+         en el manifest para que coincida con la declaración. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <application
         android:label="PacoGames"
         android:name="${applicationName}"
