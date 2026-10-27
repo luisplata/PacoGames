@@ -48,7 +48,8 @@ const _cartaKey = Key('carta_yo_nunca');
 Future<FakesAudio> irAlJuego(
   WidgetTester tester, {
   String nivel = 'Normal',
-  bool modoAlcohol = false,
+  /// `null` = default sobrio (A3). Los tests de Picante pasan `false`.
+  bool? modoAlcohol,
   bool sonido = true,
   bool vibracion = true,
   DiagnosticoContenido? diagnostico,
@@ -119,7 +120,9 @@ void main() {
   group('YoNuncaJuegoPage — arranque y flip', () {
     testWidgets('sin picker: primera carta boca abajo con C1 + C2 y sin '
         '[Siguiente]', (tester) async {
-      await irAlJuego(tester);
+      // Partida en modo alcohol (banner ausente); el default sobrio se cubre
+      // aparte en el grupo de nivel y dorso.
+      await irAlJuego(tester, modoAlcohol: false);
 
       expect(find.text('Elegí un género'), findsNothing);
       expect(find.byType(ChoiceChip), findsNothing);
@@ -208,6 +211,23 @@ void main() {
   });
 
   group('YoNuncaJuegoPage — nivel y dorso', () {
+    testWidgets('sin presembrar ajustes → default sobrio: banner C12 y mazo '
+        'solo Normal', (tester) async {
+      await irAlJuego(tester);
+
+      expect(find.text(_bannerTexto), findsOneWidget);
+      expect(find.text('Nivel: Normal'), findsOneWidget);
+
+      final vistas = <String>{};
+      for (var i = 0; i < 3; i++) {
+        expect(dorsoActual(tester), 'normal');
+        await revelar(tester);
+        vistas.add(fraseActual(tester)!);
+        await tocarBoton(tester, 'Siguiente');
+      }
+      expect(vistas, {'N1', 'N2', 'N3'});
+    });
+
     testWidgets('dorso Picante → frente Picante coherentes', (tester) async {
       // Normal vacío + Picante ['P1'] → mazo determinista de 1 carta Picante.
       const diagnostico = DiagnosticoContenido(
@@ -222,7 +242,12 @@ void main() {
         },
         errores: [],
       );
-      await irAlJuego(tester, nivel: 'Picante', diagnostico: diagnostico);
+      await irAlJuego(
+        tester,
+        nivel: 'Picante',
+        modoAlcohol: false,
+        diagnostico: diagnostico,
+      );
 
       expect(find.text('Nivel: Picante'), findsOneWidget);
       expect(find.byKey(const Key('dorso_picante')), findsOneWidget);
@@ -237,7 +262,7 @@ void main() {
     testWidgets(
       'nivel Picante → aditivo 5 cartas sin repetir y dorso = frente',
       (tester) async {
-        await irAlJuego(tester, nivel: 'Picante');
+        await irAlJuego(tester, nivel: 'Picante', modoAlcohol: false);
 
         expect(find.text('Nivel: Picante'), findsOneWidget);
         final vistas = <String>{};

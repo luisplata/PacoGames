@@ -34,9 +34,12 @@ class AjustesPage extends ConsumerWidget {
                 onChanged: (v) => ref.read(ajustesProvider.notifier).cambiarVibracion(v),
               ),
               SwitchListTile(
-                title: const Text('Modo alcohol'),
-                subtitle: const Text('Oculta contenido picante'),
-                value: value.modoAlcohol,
+                key: const Key('switch_modo_sin_alcohol'),
+                title: const Text('Modo sin alcohol'),
+                subtitle: const Text(
+                  'Oculta el contenido picante y cambia los tragos por prendas.',
+                ),
+                value: value.modoSinAlcohol,
                 onChanged: (v) => ref.read(ajustesProvider.notifier).cambiarModoAlcohol(v),
               ),
               const Divider(),

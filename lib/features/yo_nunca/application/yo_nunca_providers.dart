@@ -32,15 +32,16 @@ class MazoNotifier extends Notifier<Mazo<CartaYoNunca>> {
     final nivel = ref.watch(yoNuncaNivelProvider);
     final diagnostico = ref.watch(diagnosticoContenidoProvider).value;
     final ajustes = ref.watch(ajustesProvider).value;
-    // WU2: fallback por el campo; WU4 introduce el getter `modoSinAlcohol`.
-    final modoAlcohol = ajustes?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+    // D8/A3: `true` = modo sin alcohol; el fallback de carga es el default
+    // sobrio (no un `false` optimista).
+    final sobrio = ajustes?.modoSinAlcohol ?? Ajustes.defaults.modoSinAlcohol;
     final generos =
         diagnostico?.contenidos['yo_nunca']?.generos ?? const <Genero>[];
 
     // `cartasDelNivel` ya fuerza Normal en modo sin alcohol (D4/YN10): el
     // nivel pedido NO se valida acá para no duplicar la única verdad.
     return Mazo.barajar(
-      cartasDelNivel(generos, nivel: nivel, modoAlcohol: modoAlcohol),
+      cartasDelNivel(generos, nivel: nivel, modoAlcohol: sobrio),
     );
   }
 

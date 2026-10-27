@@ -105,7 +105,10 @@ Future<FakesAudio> arrancarConAudio(
   required bool splashVisto,
   bool sonido = true,
   bool vibracion = true,
-  bool modoAlcohol = false,
+  /// `null` = no se siembra la clave: manda `Ajustes.defaults.modoAlcohol`
+  /// (modo sin alcohol ON). Los tests que necesitan Picante pasan `false`
+  /// explícito, que la migración respeta gracias al marker.
+  bool? modoAlcohol,
   List<ErrorContenido> errores = const [],
   DiagnosticoContenido? diagnostico,
 }) async {
@@ -115,10 +118,11 @@ Future<FakesAudio> arrancarConAudio(
   await prefs.setBool('ajustes.splashVisto', splashVisto);
   await prefs.setBool('ajustes.sonido', sonido);
   await prefs.setBool('ajustes.vibracion', vibracion);
-  await prefs.setBool('ajustes.modoAlcohol', modoAlcohol);
-  // Marker de la migración de modo sin alcohol: los tests que necesitan
-  // Picante pasan `modoAlcohol: false` explícito y la migración no debe
-  // pisarlo cuando llegue WU4.
+  if (modoAlcohol != null) {
+    await prefs.setBool('ajustes.modoAlcohol', modoAlcohol);
+  }
+  // Marker de la migración de modo sin alcohol: sin él, la migración de WU4
+  // pisaría el `false` explícito que necesitan los tests de Picante.
   await prefs.setBool('ajustes.migracionModoSinAlcohol', true);
 
   final fakes = FakesAudio();

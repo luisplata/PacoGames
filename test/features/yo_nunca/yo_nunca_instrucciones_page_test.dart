@@ -21,15 +21,13 @@ void main() {
       WidgetTester tester, {
       bool modoAlcohol = false,
     }) async {
-      if (modoAlcohol) {
-        await arrancarConAudio(
-          tester,
-          splashVisto: true,
-          modoAlcohol: true,
-        );
-      } else {
-        await arrancarApp(tester, splashVisto: true);
-      }
+      // Siempre explícito: el default de la app es sobrio (A3), y estos
+      // tests de nivel necesitan alcohol salvo el caso sober.
+      await arrancarConAudio(
+        tester,
+        splashVisto: true,
+        modoAlcohol: modoAlcohol,
+      );
       await navegarDesdeHome(tester, find.byKey(HomeKeys.yoNunca));
     }
 

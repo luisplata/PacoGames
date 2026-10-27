@@ -16,6 +16,7 @@ class AjustesRepository {
   static const _sonidoKey = 'ajustes.sonido';
   static const _vibracionKey = 'ajustes.vibracion';
   static const _modoAlcoholKey = 'ajustes.modoAlcohol';
+  static const _migracionModoSinAlcoholKey = 'ajustes.migracionModoSinAlcohol';
   static const _splashVistoKey = 'ajustes.splashVisto';
   static const _generoPrefijo = 'ajustes.generoPreferido.';
   static const _juegoIds = ['yo_nunca', 'ruleta', 'pictionary'];
@@ -27,6 +28,7 @@ class AjustesRepository {
     _sonidoKey,
     _vibracionKey,
     _modoAlcoholKey,
+    _migracionModoSinAlcoholKey,
     _splashVistoKey,
     '$_generoPrefijo' 'yo_nunca',
     '$_generoPrefijo' 'ruleta',
@@ -41,6 +43,15 @@ class AjustesRepository {
         await _prefs.clear(allowList: keys);
         await _escribir(Ajustes.defaults);
         return Ajustes.defaults;
+      }
+
+      // Migración de una sola vez (A3): las instalaciones previas guardaban
+      // `modoAlcohol=false` (el default viejo, no una elección). Sin marker,
+      // pasan a modo sin alcohol y se marca para no repetir. El schema NO
+      // cambia: no se resetean splash ni el resto de ajustes (R7).
+      if (await _prefs.getBool(_migracionModoSinAlcoholKey) != true) {
+        await _prefs.setBool(_modoAlcoholKey, true);
+        await _prefs.setBool(_migracionModoSinAlcoholKey, true);
       }
 
       final generoPreferido = <String, String>{};
@@ -79,6 +90,9 @@ class AjustesRepository {
     await _prefs.setBool(_sonidoKey, a.sonido);
     await _prefs.setBool(_vibracionKey, a.vibracion);
     await _prefs.setBool(_modoAlcoholKey, a.modoAlcohol);
+    // Cualquier guardado posterior es autoritativo: el marker impide que la
+    // migración vuelva a pisar la elección del usuario.
+    await _prefs.setBool(_migracionModoSinAlcoholKey, true);
     await _prefs.setBool(_splashVistoKey, a.splashVisto);
     for (final id in _juegoIds) {
       final nombre = a.generoPreferido[id];

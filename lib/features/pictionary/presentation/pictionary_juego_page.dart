@@ -201,7 +201,7 @@ class _PictionaryJuegoPageState extends ConsumerState<PictionaryJuegoPage>
     final genero = ref.watch(pictionaryGeneroProvider);
     final diagnostico = ref.watch(diagnosticoContenidoProvider);
     final ajustes = ref.watch(ajustesProvider);
-    final modoAlcohol = ajustes.value?.modoAlcohol ?? false;
+    final modoAlcohol = ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
 
     final visibles = generosVisibles(
       diagnostico.value?.contenidos['pictionary']?.generos ?? const <Genero>[],

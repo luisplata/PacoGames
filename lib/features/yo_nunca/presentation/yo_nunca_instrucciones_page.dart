@@ -25,9 +25,9 @@ class YoNuncaInstruccionesPage extends ConsumerWidget {
     // mientras la página está montada: sobrevive reglas → juego (YN3).
     final elegido = ref.watch(yoNuncaNivelProvider);
     final ajustes = ref.watch(ajustesProvider);
-    // WU2 usa el campo + `Ajustes.defaults`; WU4 agrega el getter
-    // `modoSinAlcohol` y cambia el default.
-    final modoAlcohol = ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+    // D8/A3: `true` = modo sin alcohol; fallback = default sobrio.
+    final modoAlcohol =
+        ajustes.value?.modoSinAlcohol ?? Ajustes.defaults.modoSinAlcohol;
     final efectivo = nivelEfectivo(elegido: elegido, modoAlcohol: modoAlcohol);
 
     final nota = modoAlcohol

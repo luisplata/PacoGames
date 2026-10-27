@@ -18,7 +18,7 @@ class Ajustes {
   static const defaults = Ajustes(
     sonido: true,
     vibracion: true,
-    modoAlcohol: false,
+    modoAlcohol: true,
     generoPreferido: {},
     splashVisto: false,
   );
@@ -26,6 +26,11 @@ class Ajustes {
   final bool sonido;
   final bool vibracion;
   final bool modoAlcohol;
+
+  /// Lectura semántica del campo persistido: `true` = modo sin alcohol
+  /// (sober). No renombra [modoAlcohol] para no migrar la clave guardada
+  /// ni romper a los consumidores existentes (D8).
+  bool get modoSinAlcohol => modoAlcohol;
 
   /// Género preferido por juego (`juegoId → nombre`). Sin UI en M0,
   /// pero persiste para que M1-M3 lo lean.

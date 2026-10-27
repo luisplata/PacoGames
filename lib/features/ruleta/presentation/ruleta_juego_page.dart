@@ -110,7 +110,7 @@ class _RuletaJuegoPageState extends ConsumerState<RuletaJuegoPage> {
     final genero = ref.watch(ruletaGeneroProvider);
     final diagnostico = ref.watch(diagnosticoContenidoProvider);
     final ajustes = ref.watch(ajustesProvider);
-    final modoAlcohol = ajustes.value?.modoAlcohol ?? false;
+    final modoAlcohol = ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
 
     final visibles = generosVisibles(
       diagnostico.value?.contenidos['ruleta']?.generos ?? const <Genero>[],

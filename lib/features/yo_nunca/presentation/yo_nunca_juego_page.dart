@@ -109,9 +109,9 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     final diagnostico = ref.watch(diagnosticoContenidoProvider);
     final ajustes = ref.watch(ajustesProvider);
     final nivel = ref.watch(yoNuncaNivelProvider);
-    // WU2 usa el campo + `Ajustes.defaults`; WU4 cambia default y getter.
+    // D8/A3: `true` = modo sin alcohol; fallback = default sobrio.
     final modoAlcohol =
-        ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+        ajustes.value?.modoSinAlcohol ?? Ajustes.defaults.modoSinAlcohol;
     final efectivo = nivelEfectivo(elegido: nivel, modoAlcohol: modoAlcohol);
 
     // Reconstrucción externa del mazo (nivel/ajustes): la carta nace limpia
