@@ -6,14 +6,14 @@ import '../../../core/ajustes/ajustes.dart';
 import '../../../core/ajustes/ajustes_providers.dart';
 import '../../../core/audio/sonido_provider.dart';
 import '../../../core/contenido/diagnostico.dart';
-import '../../../core/contenido/entidades.dart';
-import '../../../core/contenido/generos_visibles.dart';
 import '../../../core/widgets/aviso_modo_sin_alcohol.dart';
+import '../application/carta_yo_nunca.dart';
+import '../application/mazo.dart';
 import '../application/yo_nunca_providers.dart';
 
-/// Juego de Yo Nunca (YN4-YN6, YN8): picker de género → mazo → frase +
-/// [Siguiente]; modo sin alcohol de doble efecto (banner + Picante oculto);
-/// salida mid-game con confirmación (estado efímero autoDispose).
+/// Juego de Yo Nunca (YN4-YN6, YN8) — paso intermedio de WU2: sin picker,
+/// arranca directo con el nivel elegido en reglas y muestra el frente con la
+/// imagen arriba + frase abajo. El flip/juramento llega en WU3.
 class YoNuncaJuegoPage extends ConsumerStatefulWidget {
   const YoNuncaJuegoPage({super.key});
 
@@ -22,16 +22,9 @@ class YoNuncaJuegoPage extends ConsumerStatefulWidget {
 }
 
 class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
-  /// Auto-select post-frame: se dispara UNA vez (D4). Idempotente: el
-  /// callback re-chequea que el género siga null antes de escribir.
-  bool _autoSeleccionPendiente = true;
-
   /// Permite el pop real tras confirmar la salida (D6): con canPop false
   /// `context.pop()` quedaría bloqueado por el PopScope.
   bool _salirConfirmado = false;
-
-  /// Selección visual del chip (default = generoPreferido si sigue visible).
-  String? _seleccion;
 
   Future<void> _mostrarDialogoSalida() async {
     final salir = await showDialog<bool>(
@@ -58,78 +51,49 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
   }
 
   void _onBackPressed() {
-    final genero = ref.read(yoNuncaGeneroProvider);
-    if (genero == null || _salirConfirmado) {
+    // "Partida en curso" = el mazo tiene cartas (antes: género elegido).
+    final total = ref.read(yoNuncaMazoProvider).total;
+    if (total == 0 || _salirConfirmado) {
       context.pop();
     } else {
       _mostrarDialogoSalida();
     }
   }
 
-  void _elegirGenero(String nombre) {
-    setState(() => _seleccion = nombre);
-    ref.read(yoNuncaMazoProvider.notifier).seleccionarGenero(nombre);
-    // Persistencia explícita del preferido (D5, proposal D5).
-    ref.read(ajustesProvider.notifier).setGeneroPreferido('yo_nunca', nombre);
-  }
-
-  Genero? _generoInfo(DiagnosticoContenido? diagnostico, String nombre) {
-    final juego = diagnostico?.contenidos['yo_nunca'];
-    if (juego == null) return null;
-    for (final g in juego.generos) {
-      if (g.nombre == nombre) return g;
-    }
-    return null;
-  }
+  String _nombreNivel(NivelYoNunca nivel) =>
+      nivel == NivelYoNunca.picante ? 'Picante' : 'Normal';
 
   @override
   Widget build(BuildContext context) {
-    final genero = ref.watch(yoNuncaGeneroProvider);
     final diagnostico = ref.watch(diagnosticoContenidoProvider);
     final ajustes = ref.watch(ajustesProvider);
-    final modoAlcohol = ajustes.value?.modoAlcohol ?? false;
+    final nivel = ref.watch(yoNuncaNivelProvider);
+    // WU2 usa el campo + `Ajustes.defaults`; WU4 cambia default y getter.
+    final modoAlcohol = ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+    final efectivo = nivelEfectivo(elegido: nivel, modoAlcohol: modoAlcohol);
 
-    // Carta al revelar (AH6/A6): el mazo es dominio puro; el listen cubre
-    // el reveal manual Y el auto-select (una carta SÍ se revela al elegir
-    // género). Gated por ajustes.sonido vía el servicio.
+    // AH6 (interino): SFX `carta` al cambiar la carta visible (Siguiente,
+    // mezclar, cambio de mazo). El tap-reveal de WU3 mueve este SFX al tap.
     ref.listen(yoNuncaMazoProvider, (prev, next) {
-      final generoSeleccionado = ref.read(yoNuncaGeneroProvider);
-      if (generoSeleccionado != null &&
-          next.cartaActual != null &&
-          next.cartaActual != prev?.cartaActual) {
+      final anterior = prev?.cartaActual?.texto;
+      final actual = next.cartaActual;
+      // `prev.total == 0` es la carga inicial (diagnóstico/ajustes aún
+      // resolviendo), no un avance real: no suena.
+      if (prev != null &&
+          prev.total > 0 &&
+          actual != null &&
+          actual.texto != anterior) {
         ref.read(sonidoServicioProvider).reproducirCarta();
       }
     });
 
-    final visibles = generosVisibles(
-      diagnostico.value?.contenidos['yo_nunca']?.generos ?? const <Genero>[],
-      modoAlcohol: modoAlcohol,
-    );
-
-    // Auto-select: exactamente 1 género visible → arranca directo (YN4),
-    // SIN persistir preferido (D4). Se decide UNA sola vez, y solo cuando
-    // diagnostico Y ajustes ya cargaron: con modoAlcohol aún en loading el
-    // set de visibles sería el equivocado (picante no oculto).
-    if (_autoSeleccionPendiente &&
-        genero == null &&
-        diagnostico.value != null &&
-        ajustes.value != null) {
-      _autoSeleccionPendiente = false;
-      if (visibles.length == 1) {
-        final unico = visibles.first.nombre;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && ref.read(yoNuncaGeneroProvider) == null) {
-            ref.read(yoNuncaMazoProvider.notifier).seleccionarGenero(unico);
-          }
-        });
-      }
-    }
+    final mazo = ref.watch(yoNuncaMazoProvider);
 
     return Scaffold(
       body: PopScope(
-        canPop: genero == null || _salirConfirmado,
+        canPop: mazo.total == 0 || _salirConfirmado,
         onPopInvokedWithResult: (didPop, result) {
-          if (!didPop && genero != null && !_salirConfirmado) {
+          if (!didPop && mazo.total > 0 && !_salirConfirmado) {
             _mostrarDialogoSalida();
           }
         },
@@ -149,15 +113,38 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
                           color: Colors.white,
                           onPressed: _onBackPressed,
                         ),
-                        if (modoAlcohol) const AvisoModoSinAlcohol(),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Wrap(
+                              alignment: WrapAlignment.end,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              runSpacing: 4,
+                              children: [
+                                if (modoAlcohol) const AvisoModoSinAlcohol(),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Text(
+                                    'Nivel: ${_nombreNivel(efectivo)}',
+                                    key: const Key('nivel_partida'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   Expanded(
                     child: switch (diagnostico) {
-                      AsyncData(:final value) => genero == null
-                          ? _picker(visibles, value, ajustes.value)
-                          : _carta(genero, value),
+                      AsyncData() => _contenido(mazo),
                       _ => const Center(child: CircularProgressIndicator()),
                     },
                   ),
@@ -170,15 +157,15 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     );
   }
 
-  Widget _picker(List<Genero> visibles, DiagnosticoContenido diagnostico,
-      Ajustes? ajustes) {
-    if (visibles.isEmpty) {
-      // Edge defensivo YN4: solo-Picante + modo sin alcohol.
+  Widget _contenido(Mazo<CartaYoNunca> mazo) {
+    if (mazo.total == 0) {
+      // Edge defensivo YN4: sin cartas para el nivel → C16, sin crash.
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Sin géneros disponibles en este modo',
+            'Sin cartas disponibles en este nivel.',
+            key: const Key('sin_cartas_nivel'),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.white,
@@ -187,45 +174,6 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
         ),
       );
     }
-
-    // Default visual: generoPreferido solo si sigue siendo visible (D-risk).
-    final preferido = ajustes?.generoPreferido['yo_nunca'];
-    final preseleccion =
-        (preferido != null && visibles.any((g) => g.nombre == preferido))
-            ? preferido
-            : null;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Text(
-            'Elegí un género',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontFamily: 'Grobold',
-                  color: Colors.white,
-                ),
-          ),
-          const SizedBox(height: 24),
-          Wrap(
-            spacing: 12,
-            children: [
-              for (final genero in visibles)
-                ChoiceChip(
-                  label: Text(genero.nombre),
-                  selected: (_seleccion ?? preseleccion) == genero.nombre,
-                  onSelected: (_) => _elegirGenero(genero.nombre),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _carta(String genero, DiagnosticoContenido diagnostico) {
-    final mazo = ref.watch(yoNuncaMazoProvider);
-    final notifier = ref.read(yoNuncaMazoProvider.notifier);
 
     if (mazo.agotado) {
       // Fin de mazo (YN6): remezcla explícita del usuario (D2).
@@ -249,7 +197,7 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
                 onPressed: () {
                   // AH6: click en [Mezclar de nuevo].
                   ref.read(sonidoServicioProvider).reproducirClick();
-                  notifier.remezclar();
+                  ref.read(yoNuncaMazoProvider.notifier).remezclar();
                 },
                 child: const Text('Mezclar de nuevo'),
               ),
@@ -259,24 +207,22 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
       );
     }
 
-    final generoInfo = _generoInfo(diagnostico, genero);
-    final pocoContenido =
-        generoInfo != null && generoInfo.cartas.length < 5;
+    final carta = mazo.cartaActual!;
+    final pocoContenido = mazo.total < 5;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
+          // Layout interino de WU2 (el flip llega en WU3).
           Image.asset(
-            genero == 'Picante'
-                ? 'assets/images/carta_picante.webp'
-                : 'assets/images/carta_normal.webp',
+            'assets/images/carta_${carta.nivel.name}.webp',
             height: 180,
             fit: BoxFit.contain,
           ),
           const SizedBox(height: 24),
           Text(
-            mazo.cartaActual!,
+            carta.texto,
             key: const Key('frase_yo_nunca'),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -287,7 +233,7 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
           if (pocoContenido) ...[
             const SizedBox(height: 12),
             Text(
-              'Poco contenido en este género',
+              'Poco contenido en este nivel',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: .85),
                 fontSize: 14,
@@ -300,7 +246,7 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
             onPressed: () {
               // AH6: click en [Siguiente].
               ref.read(sonidoServicioProvider).reproducirClick();
-              notifier.siguiente();
+              ref.read(yoNuncaMazoProvider.notifier).siguiente();
             },
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),

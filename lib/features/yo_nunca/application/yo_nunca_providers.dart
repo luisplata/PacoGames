@@ -1,51 +1,47 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// Riverpod 3 mantiene StateProvider detrás de legacy.dart (diseño M1 lo
-// especifica para el género seleccionado: StateProvider.autoDispose).
+// Riverpod 3 mantiene StateProvider detrás de legacy.dart (diseño D3:
+// nivel efímero con StateProvider.autoDispose).
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../core/ajustes/ajustes.dart';
 import '../../../core/ajustes/ajustes_providers.dart';
 import '../../../core/contenido/diagnostico.dart';
 import '../../../core/contenido/entidades.dart';
+import 'carta_yo_nunca.dart';
 import 'mazo.dart';
 
-/// Género seleccionado de la partida actual (YN3).
+/// Nivel elegido en `/yo-nunca` para la partida actual (YN3).
 ///
-/// `null` = sin género → la UI muestra el picker. Efímero: autoDispose
-/// descarta el estado al salir de la ruta (re-entrar = picker fresco).
-final yoNuncaGeneroProvider = StateProvider.autoDispose<String?>((ref) => null);
+/// Default Normal y NO persistido: efímero. autoDispose lo descarta al salir
+/// de la ruta; la página de reglas lo watchea, por eso sobrevive el push al
+/// juego (la regla queda montada debajo).
+final yoNuncaNivelProvider = StateProvider.autoDispose<NivelYoNunca>(
+  (ref) => NivelYoNunca.normal,
+);
 
-/// Mazo de la partida actual (YN3): se construye del género seleccionado
-/// y se descarta al salir (autoDispose, sin listeners).
-final yoNuncaMazoProvider = NotifierProvider.autoDispose<MazoNotifier, Mazo>(
+/// Mazo de la partida actual (YN3): se compone con `cartasDelNivel` a partir
+/// del nivel elegido, el diagnóstico y los ajustes; se descarta al salir.
+final yoNuncaMazoProvider =
+    NotifierProvider.autoDispose<MazoNotifier, Mazo<CartaYoNunca>>(
   MazoNotifier.new,
 );
 
-class MazoNotifier extends Notifier<Mazo> {
+class MazoNotifier extends Notifier<Mazo<CartaYoNunca>> {
   @override
-  Mazo build() {
-    final genero = ref.watch(yoNuncaGeneroProvider);
+  Mazo<CartaYoNunca> build() {
+    final nivel = ref.watch(yoNuncaNivelProvider);
     final diagnostico = ref.watch(diagnosticoContenidoProvider).value;
-    // Ajustes: dependencia del diseño — si cambia modoAlcohol, el mazo
-    // se reconstruye (el picker ya impide elegir Picante en ese modo).
-    ref.watch(ajustesProvider);
-    return Mazo.barajar(_cartasDelGenero(diagnostico, genero));
-  }
+    final ajustes = ref.watch(ajustesProvider).value;
+    // WU2: fallback por el campo; WU4 introduce el getter `modoSinAlcohol`.
+    final modoAlcohol = ajustes?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+    final generos =
+        diagnostico?.contenidos['yo_nunca']?.generos ?? const <Genero>[];
 
-  /// Cartas del género seleccionado; desconocido/ausente → `[]` (mazo vacío,
-  /// sin crash — YN4 edge defensivo).
-  List<String> _cartasDelGenero(DiagnosticoContenido? diagnostico, String? genero) {
-    if (genero == null || diagnostico == null) return const [];
-    final juego = diagnostico.contenidos['yo_nunca'];
-    if (juego == null) return const [];
-    for (final g in juego.generos) {
-      if (g.nombre == genero) return g.cartas;
-    }
-    return const [];
-  }
-
-  /// Escribe el género seleccionado → el mazo se reconstruye (D5).
-  void seleccionarGenero(String genero) {
-    ref.read(yoNuncaGeneroProvider.notifier).state = genero;
+    // `cartasDelNivel` ya fuerza Normal en modo sin alcohol (D4/YN10): el
+    // nivel pedido NO se valida acá para no duplicar la única verdad.
+    return Mazo.barajar(
+      cartasDelNivel(generos, nivel: nivel, modoAlcohol: modoAlcohol),
+    );
   }
 
   void siguiente() => state = state.siguiente();

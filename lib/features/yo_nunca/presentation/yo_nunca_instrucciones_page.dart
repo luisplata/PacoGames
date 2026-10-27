@@ -1,19 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Instrucciones de Yo Nunca (YN7): fondo wallpaper, logo, 3 bullets
-/// exactos del proposal (copy rioplatense, D1) + [Jugar] → /yo-nunca/juego.
-class YoNuncaInstruccionesPage extends StatelessWidget {
+import '../../../core/ajustes/ajustes.dart';
+import '../../../core/ajustes/ajustes_providers.dart';
+import '../application/carta_yo_nunca.dart';
+import '../application/yo_nunca_providers.dart';
+
+/// Instrucciones de Yo Nunca (YN7): fondo wallpaper, logo, 3 bullets exactos
+/// del proposal (copy rioplatense, D1) + bloque de Nivel (default Normal) +
+/// [Jugar] → /yo-nunca/juego conservando el nivel elegido.
+class YoNuncaInstruccionesPage extends ConsumerWidget {
   const YoNuncaInstruccionesPage({super.key});
 
   static const _bullets = [
-    'Elegí el género: barajamos las cartas y no se repiten hasta agotar el mazo',
+    'Elegí el nivel: barajamos las cartas y no se repiten hasta agotar el mazo',
     'Pasá el teléfono y leé la frase en voz alta',
     'Si la hiciste, ¡traguito! Si no, pasá el teléfono',
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Estos dos watches son los que mantienen vivo el nivel autoDispose
+    // mientras la página está montada: sobrevive reglas → juego (YN3).
+    final elegido = ref.watch(yoNuncaNivelProvider);
+    final ajustes = ref.watch(ajustesProvider);
+    // WU2 usa el campo + `Ajustes.defaults`; WU4 agrega el getter
+    // `modoSinAlcohol` y cambia el default.
+    final modoAlcohol = ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+    final efectivo = nivelEfectivo(elegido: elegido, modoAlcohol: modoAlcohol);
+
+    final nota = modoAlcohol
+        ? 'Modo sin alcohol activo: Picante no está disponible. '
+            'Desactivalo en Ajustes.'
+        : efectivo == NivelYoNunca.picante
+            ? 'Picante suma las cartas picantes a las normales.'
+            : 'Normal usa solo las cartas normales.';
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -80,6 +103,13 @@ class YoNuncaInstruccionesPage extends StatelessWidget {
                             ),
                           ),
                         const SizedBox(height: 8),
+                        _bloqueNivel(
+                          ref,
+                          efectivo: efectivo,
+                          modoAlcohol: modoAlcohol,
+                          nota: nota,
+                        ),
+                        const SizedBox(height: 16),
                         Text(
                           'Qué necesitás: nada, solo el teléfono',
                           style: TextStyle(
@@ -104,6 +134,74 @@ class YoNuncaInstruccionesPage extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Bloque C4 + segmentos C5 + nota C6/C7/C8 (diseño §7).
+  Widget _bloqueNivel(
+    WidgetRef ref, {
+    required NivelYoNunca efectivo,
+    required bool modoAlcohol,
+    required String nota,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: .45),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Nivel',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontFamily: 'Grobold',
+            ),
+          ),
+          const SizedBox(height: 12),
+          SegmentedButton<NivelYoNunca>(
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              foregroundColor: Colors.white,
+              selectedForegroundColor: Colors.black,
+              selectedBackgroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white54),
+            ),
+            segments: [
+              ButtonSegment(
+                value: NivelYoNunca.normal,
+                label: const Text('Normal', key: Key('nivel_normal')),
+              ),
+              ButtonSegment(
+                value: NivelYoNunca.picante,
+                // Picante no es seleccionable en modo sin alcohol (YN7).
+                enabled: !modoAlcohol,
+                label: const Text('Picante', key: Key('nivel_picante')),
+              ),
+            ],
+            selected: {efectivo},
+            onSelectionChanged: (seleccion) {
+              final nuevo = seleccion.single;
+              // Defensa extra al `enabled: false` (doble gate).
+              if (nuevo == NivelYoNunca.picante && modoAlcohol) return;
+              ref.read(yoNuncaNivelProvider.notifier).state = nuevo;
+            },
+          ),
+          const SizedBox(height: 12),
+          Text(
+            nota,
+            key: const Key('nota_nivel'),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: .9),
+              fontSize: 14,
             ),
           ),
         ],

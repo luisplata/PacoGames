@@ -116,6 +116,10 @@ Future<FakesAudio> arrancarConAudio(
   await prefs.setBool('ajustes.sonido', sonido);
   await prefs.setBool('ajustes.vibracion', vibracion);
   await prefs.setBool('ajustes.modoAlcohol', modoAlcohol);
+  // Marker de la migración de modo sin alcohol: los tests que necesitan
+  // Picante pasan `modoAlcohol: false` explícito y la migración no debe
+  // pisarlo cuando llegue WU4.
+  await prefs.setBool('ajustes.migracionModoSinAlcohol', true);
 
   final fakes = FakesAudio();
   final bridge = BootBridge()
@@ -167,6 +171,19 @@ Future<FakesAudio> arrancarConAudio(
 /// etc.). El Home nuevo no usa botones Material, así que recibe un [Finder].
 Future<void> navegarDesdeHome(WidgetTester tester, Finder destino) async {
   await tester.tap(destino);
+  await tester.pumpAndSettle();
+}
+
+/// Elige el nivel en `/yo-nunca` tocando el segmento Normal o Picante.
+///
+/// Helper de la migración WU2: el picker in-game se retiró y el nivel se
+/// elige en reglas, así que los tests de juego pasan por acá antes de Jugar.
+Future<void> elegirNivelYoNunca(WidgetTester tester, String nivel) async {
+  final key = Key('nivel_${nivel.toLowerCase()}');
+  final finder = find.byKey(key);
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
   await tester.pumpAndSettle();
 }
 
