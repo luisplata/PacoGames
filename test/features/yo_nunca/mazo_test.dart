@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:paco_game/features/yo_nunca/application/carta_yo_nunca.dart';
 import 'package:paco_game/features/yo_nunca/application/mazo.dart';
 
 void main() {
@@ -37,7 +38,7 @@ void main() {
       final b = Mazo.barajar(cartas, random: Random(11));
       final c = Mazo.barajar(cartas, random: Random(22));
 
-      List<String> ordenCompleto(Mazo m) {
+      List<String> ordenCompleto(Mazo<String> m) {
         final out = <String>[m.cartaActual!];
         var actual = m;
         while (!actual.agotado) {
@@ -152,7 +153,7 @@ void main() {
       final r1 = original.remezclar(random: Random(21));
       final r2 = original.remezclar(random: Random(21));
 
-      List<String> ordenCompleto(Mazo m) {
+      List<String> ordenCompleto(Mazo<String> m) {
         final out = <String>[m.cartaActual!];
         var actual = m;
         while (!actual.agotado) {
@@ -172,6 +173,62 @@ void main() {
       final re = vacio.remezclar(random: Random(1));
       expect(re.agotado, isTrue);
       expect(re.cartaActual, isNull);
+    });
+  });
+
+  group('Mazo.total', () {
+    test('total = tamaño del mazo y se mantiene estable al avanzar/agotar', () {
+      final cartas = List.generate(146, (i) => 'carta $i');
+      var mazo = Mazo<String>.barajar(cartas, random: Random(4));
+
+      expect(mazo.total, 146);
+      while (!mazo.agotado) {
+        mazo = mazo.siguiente();
+        expect(mazo.total, 146, reason: 'total no son las restantes');
+      }
+      expect(mazo.agotado, isTrue);
+      expect(mazo.total, 146);
+    });
+
+    test('vacío → total 0', () {
+      final vacio = Mazo<String>.barajar(const [], random: Random(1));
+      expect(vacio.total, 0);
+    });
+
+    test('remezclar conserva el total', () {
+      final mazo = Mazo<String>.barajar(['a', 'b', 'c'], random: Random(8));
+      final re = mazo.siguiente().remezclar(random: Random(8));
+      expect(re.total, 3);
+    });
+  });
+
+  group('Mazo<CartaYoNunca>', () {
+    const cartas = [
+      CartaYoNunca(texto: 'n1', nivel: NivelYoNunca.normal),
+      CartaYoNunca(texto: 'p1', nivel: NivelYoNunca.picante),
+      CartaYoNunca(texto: 'n2', nivel: NivelYoNunca.normal),
+    ];
+
+    test('conserva el nivel de origen y no repite hasta agotar', () {
+      final mazo = Mazo<CartaYoNunca>.barajar(cartas, random: Random(2));
+
+      final salidas = <CartaYoNunca>[];
+      var actual = mazo;
+      while (!actual.agotado) {
+        salidas.add(actual.cartaActual!);
+        actual = actual.siguiente();
+      }
+
+      expect(salidas.length, cartas.length);
+      expect(salidas.toSet(), cartas.toSet());
+      expect(
+        salidas.firstWhere((c) => c.texto == 'p1').nivel,
+        NivelYoNunca.picante,
+      );
+      expect(
+        salidas.firstWhere((c) => c.texto == 'n1').nivel,
+        NivelYoNunca.normal,
+      );
     });
   });
 }

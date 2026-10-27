@@ -1,23 +1,23 @@
 import 'dart:math';
 
-/// Mazo de cartas puro e inmutable para Yo Nunca (D1).
+/// Mazo de cartas puro e inmutable, genérico en el tipo de carta (D1/YN1).
 ///
 /// Sin imports de Flutter a propósito: la mecánica es dominio puro y
 /// testeable con seed. Fisher-Yates sobre una COPIA de la lista original
 /// (nunca la muta). "Sin repetir hasta agotar" es la semántica natural
 /// del recorrido indexado + remezcla explícita (D2).
-class Mazo {
+class Mazo<T> {
   const Mazo._({
-    required List<String> cartas,
+    required List<T> cartas,
     required int indice,
-    required List<String> historial,
+    required List<T> historial,
   })  : _cartas = cartas,
         _indice = indice,
         _historial = historial;
 
   /// Baraja [cartas] (copia, Fisher-Yates) y deja la primera carta lista
   /// para verse sin tap extra (D3). [random] inyectable para determinismo.
-  factory Mazo.barajar(List<String> cartas, {Random? random}) {
+  factory Mazo.barajar(List<T> cartas, {Random? random}) {
     final rng = random ?? Random();
     final barajadas = List.of(cartas);
     for (var i = barajadas.length - 1; i > 0; i--) {
@@ -35,22 +35,25 @@ class Mazo {
 
   /// Lista barajada interna: NUNCA se muta tras la construcción, por eso
   /// los estados derivados pueden compartirla sin riesgo (D1).
-  final List<String> _cartas;
+  final List<T> _cartas;
   final int _indice;
-  final List<String> _historial;
+  final List<T> _historial;
 
   /// Carta actual: la primera del mazo tras barajar, `null` si agotado.
-  String? get cartaActual => agotado ? null : _cartas[_indice];
+  T? get cartaActual => agotado ? null : _cartas[_indice];
+
+  /// Tamaño del mazo (tamaño del ciclo), estable al avanzar (YN1).
+  int get total => _cartas.length;
 
   /// `true` cuando el recorrido terminó (o el mazo nació vacío).
   bool get agotado => _indice >= _cartas.length;
 
   /// Cartas ya mostradas, en orden, INCLUYENDO la actual (D3).
-  List<String> get historial => List.unmodifiable(_historial);
+  List<T> get historial => List.unmodifiable(_historial);
 
   /// Avanza una carta. Idempotente en agotado y NO auto-remezcla (D2):
   /// agotado es un estado terminal estable hasta `remezclar()` explícita.
-  Mazo siguiente() {
+  Mazo<T> siguiente() {
     if (agotado) return this;
     final nuevoIndice = _indice + 1;
     if (nuevoIndice >= _cartas.length) {
@@ -65,5 +68,5 @@ class Mazo {
 
   /// Re-baraja las MISMAS cartas del mazo: índice 0, historial = [carta0].
   /// Acción explícita del usuario ([Mezclar de nuevo]), nunca automática.
-  Mazo remezclar({Random? random}) => Mazo.barajar(_cartas, random: random);
+  Mazo<T> remezclar({Random? random}) => Mazo.barajar(_cartas, random: random);
 }
