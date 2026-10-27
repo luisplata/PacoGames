@@ -12,6 +12,7 @@ import 'package:paco_game/core/ajustes/ajustes_providers.dart';
 import 'package:paco_game/core/ajustes/ajustes_repository.dart';
 import 'package:paco_game/core/contenido/diagnostico.dart';
 import 'package:paco_game/core/contenido/entidades.dart';
+import 'package:paco_game/features/home/presentation/home_page.dart';
 
 void main() {
   Future<ProviderContainer> arrancar({
@@ -64,14 +65,14 @@ void main() {
       await pumpApp(tester, container);
 
       expect(find.widgetWithText(FilledButton, 'Entendido'), findsOneWidget);
-      expect(find.text('Jugar'), findsNothing);
+      expect(find.text('PACO'), findsNothing);
     });
 
     testWidgets('splashVisto=true y sano → arranca directo en /home', (tester) async {
       final container = await arrancar(splashVisto: true);
       await pumpApp(tester, container);
 
-      expect(find.text('Jugar'), findsOneWidget);
+      expect(find.text('PACO'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Entendido'), findsNothing);
     });
 
@@ -86,10 +87,10 @@ void main() {
       await pumpApp(tester, container);
 
       expect(find.textContaining('ruleta.json:1'), findsOneWidget);
-      expect(find.text('Jugar'), findsNothing);
+      expect(find.text('PACO'), findsNothing);
     });
 
-    testWidgets('flujo completo: Entendido → Home → Selector → Ajustes → Diagnóstico',
+    testWidgets('flujo completo: Entendido → Home → Pictionary → Ajustes → Diagnóstico',
         (tester) async {
       final container = await arrancar(splashVisto: false);
       await pumpApp(tester, container);
@@ -97,22 +98,20 @@ void main() {
       // Splash → Entendido → Home
       await tester.tap(find.widgetWithText(FilledButton, 'Entendido'));
       await tester.pumpAndSettle();
-      expect(find.text('Jugar'), findsOneWidget);
+      expect(find.text('PACO'), findsOneWidget);
 
-      // Home → Selector
-      await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
+      // Home → instrucciones de Pictionary
+      await tester.tap(find.byKey(HomeKeys.pictionary));
       await tester.pumpAndSettle();
-      expect(find.text('Yo Nunca'), findsOneWidget);
-      expect(find.text('Ruleta'), findsOneWidget);
       expect(find.text('Pictionary'), findsOneWidget);
 
-      // Selector → back → Home
+      // Instrucciones → back → Home
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Jugar'), findsOneWidget);
+      expect(find.text('PACO'), findsOneWidget);
 
-      // Home → Ajustes
-      await tester.tap(find.widgetWithText(FilledButton, 'Ajustes'));
+      // Home → Ajustes (engranaje)
+      await tester.tap(find.byKey(HomeKeys.ajustes));
       await tester.pumpAndSettle();
       expect(find.text('Sonido'), findsOneWidget);
 
@@ -164,18 +163,13 @@ void main() {
       expect(find.text('Pasá el teléfono al dibujante'), findsNothing);
     });
 
-    testWidgets('flujo M3: Selector → /pictionary → [Jugar] → /pictionary/juego',
+    testWidgets('flujo M3: Home → /pictionary → [Jugar] → /pictionary/juego',
         (tester) async {
       final container = await arrancar(splashVisto: true);
       await pumpApp(tester, container);
 
-      // Home → Selector
-      await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-      await tester.pumpAndSettle();
-      expect(find.text('Pictionary'), findsOneWidget);
-
-      // Selector → /pictionary (instrucciones)
-      await tester.tap(find.text('Pictionary'));
+      // Home → /pictionary (instrucciones)
+      await tester.tap(find.byKey(HomeKeys.pictionary));
       await tester.pumpAndSettle();
       expect(find.text('Pictionary'), findsOneWidget);
 
@@ -190,18 +184,13 @@ void main() {
       expect(find.widgetWithText(FilledButton, 'Continuar'), findsOneWidget);
     });
 
-    testWidgets('flujo M2: Selector → /ruleta → [Jugar] → /ruleta/juego',
+    testWidgets('flujo M2: Home → /ruleta → [Jugar] → /ruleta/juego',
         (tester) async {
       final container = await arrancar(splashVisto: true);
       await pumpApp(tester, container);
 
-      // Home → Selector
-      await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-      await tester.pumpAndSettle();
-      expect(find.text('Ruleta'), findsOneWidget);
-
-      // Selector → /ruleta (instrucciones)
-      await tester.tap(find.text('Ruleta'));
+      // Home → /ruleta (instrucciones)
+      await tester.tap(find.byKey(HomeKeys.ruleta));
       await tester.pumpAndSettle();
       expect(find.text('Ruleta'), findsOneWidget);
 
@@ -215,18 +204,13 @@ void main() {
       expect(find.widgetWithText(FilledButton, 'Girar'), findsOneWidget);
     });
 
-    testWidgets('flujo M1: Selector → /yo-nunca → [Jugar] → /yo-nunca/juego',
+    testWidgets('flujo M1: Home → /yo-nunca → [Jugar] → /yo-nunca/juego',
         (tester) async {
       final container = await arrancar(splashVisto: true);
       await pumpApp(tester, container);
 
-      // Home → Selector
-      await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-      await tester.pumpAndSettle();
-      expect(find.text('Yo Nunca'), findsOneWidget);
-
-      // Selector → /yo-nunca (instrucciones)
-      await tester.tap(find.text('Yo Nunca'));
+      // Home → /yo-nunca (instrucciones)
+      await tester.tap(find.byKey(HomeKeys.yoNunca));
       await tester.pumpAndSettle();
       expect(find.text('Yo nunca'), findsOneWidget);
 

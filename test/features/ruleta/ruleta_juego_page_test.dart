@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:paco_game/core/contenido/entidades.dart';
 
+import 'package:paco_game/features/home/presentation/home_page.dart';
+
 import '../helpers.dart';
 
 const _resultadoKey = Key('resultado_ruleta');
@@ -23,7 +25,7 @@ DiagnosticoContenido diagRuleta(List<Genero> generos) => DiagnosticoContenido(
       errores: const [],
     );
 
-/// Camino real: home → selector → Ruleta (instrucciones) → [Jugar] → juego.
+/// Camino real: home → Ruleta (instrucciones) → [Jugar] → juego.
 /// Con fakes de audio/hápticos (seam AH3) — devuelve los fakes.
 Future<FakesAudio> irAlJuego(
   WidgetTester tester, {
@@ -40,9 +42,7 @@ Future<FakesAudio> irAlJuego(
     vibracion: vibracion,
     diagnostico: diagnostico ?? diagRuleta([_normalUnico]),
   );
-  await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Ruleta'));
+  await tester.tap(find.byKey(HomeKeys.ruleta));
   await tester.pumpAndSettle();
   final jugar = find.widgetWithText(FilledButton, 'Jugar');
   await tester.ensureVisible(jugar);
@@ -195,10 +195,10 @@ void main() {
       );
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Elegí un juego'), findsOneWidget); // selector
+      expect(find.text('PACO'), findsOneWidget); // Home
 
       // Re-entrar → estado descartado (autoDispose) → auto-select fresco.
-      await tester.tap(find.text('Ruleta'));
+      await tester.tap(find.byKey(HomeKeys.ruleta));
       await tester.pumpAndSettle();
       final jugar = find.widgetWithText(FilledButton, 'Jugar');
       await tester.ensureVisible(jugar);

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:paco_game/core/ajustes/ajustes_repository.dart';
+import 'package:paco_game/features/home/presentation/home_page.dart';
 
 import 'helpers.dart';
 
@@ -10,7 +11,7 @@ void main() {
   group('AjustesPage', () {
     testWidgets('muestra switches, versión y links', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Ajustes');
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.ajustes));
 
       expect(find.text('Sonido'), findsOneWidget);
       expect(find.text('Vibración'), findsOneWidget);
@@ -22,7 +23,7 @@ void main() {
 
     testWidgets('cambiar un switch persiste en el repo', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Ajustes');
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.ajustes));
 
       final sonidoSwitch = find.byType(Switch).first;
       expect(tester.widget<Switch>(sonidoSwitch).value, isTrue,
@@ -44,7 +45,7 @@ void main() {
 
     testWidgets('link a Diagnóstico navega', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Ajustes');
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.ajustes));
 
       await tester.tap(find.text('Diagnóstico'));
       await tester.pumpAndSettle();

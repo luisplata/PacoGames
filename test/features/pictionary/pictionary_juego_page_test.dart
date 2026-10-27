@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:paco_game/core/contenido/entidades.dart';
 
+import 'package:paco_game/features/home/presentation/home_page.dart';
+
 import '../helpers.dart';
 
 const _timerKey = Key('timer_pictionary');
@@ -27,7 +29,7 @@ DiagnosticoContenido diagPictionary(List<Genero> generos) =>
       errores: const [],
     );
 
-/// Camino real: home → selector → Pictionary (instrucciones) → [Jugar] → juego.
+/// Camino real: home → Pictionary (instrucciones) → [Jugar] → juego.
 /// Con fakes de audio/hápticos (seam AH3) — devuelve los fakes.
 Future<FakesAudio> irAlJuego(
   WidgetTester tester, {
@@ -44,9 +46,7 @@ Future<FakesAudio> irAlJuego(
     vibracion: vibracion,
     diagnostico: diagnostico ?? diagPictionary([_normalUnico]),
   );
-  await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Pictionary'));
+  await tester.tap(find.byKey(HomeKeys.pictionary));
   await tester.pumpAndSettle();
   final jugar = find.widgetWithText(FilledButton, 'Jugar');
   await tester.ensureVisible(jugar);

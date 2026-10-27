@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers.dart';
+import 'package:paco_game/features/home/presentation/home_page.dart';
 
 void main() {
   group('PictionaryInstruccionesPage', () {
     testWidgets('muestra título Pictionary, 3 bullets EXACTOS y "Qué necesitás"',
         (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
-      await tester.tap(find.text('Pictionary'));
-      await tester.pumpAndSettle();
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.pictionary));
 
       expect(find.text('Pictionary'), findsOneWidget);
       expect(
@@ -32,9 +31,7 @@ void main() {
     testWidgets('[Jugar] navega a /pictionary/juego (fase pase [Continuar])',
         (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
-      await tester.tap(find.text('Pictionary'));
-      await tester.pumpAndSettle();
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.pictionary));
 
       final jugar = find.widgetWithText(FilledButton, 'Jugar');
       await tester.ensureVisible(jugar);
@@ -47,15 +44,13 @@ void main() {
       expect(find.widgetWithText(FilledButton, 'Continuar'), findsOneWidget);
     });
 
-    testWidgets('back desde instrucciones vuelve al selector', (tester) async {
+    testWidgets('back desde instrucciones vuelve al Home', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
-      await tester.tap(find.text('Pictionary'));
-      await tester.pumpAndSettle();
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.pictionary));
 
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Elegí un juego'), findsOneWidget);
+      expect(find.text('PACO'), findsOneWidget);
     });
   });
 }

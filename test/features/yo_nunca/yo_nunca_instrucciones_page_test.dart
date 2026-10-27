@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers.dart';
+import 'package:paco_game/features/home/presentation/home_page.dart';
 
 void main() {
   group('YoNuncaInstruccionesPage', () {
     Future<void> irAInstrucciones(WidgetTester tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar'); // → selector
-      await tester.tap(find.text('Yo Nunca')); // → /yo-nunca
-      await tester.pumpAndSettle();
+      await navegarDesdeHome(tester, find.byKey(HomeKeys.yoNunca));
     }
 
     testWidgets('muestra título, 3 bullets exactos y qué necesitás',
@@ -47,13 +46,13 @@ void main() {
       expect(find.widgetWithText(FilledButton, 'Siguiente'), findsOneWidget);
     });
 
-    testWidgets('back desde instrucciones vuelve al selector', (tester) async {
+    testWidgets('back desde instrucciones vuelve al Home', (tester) async {
       await irAInstrucciones(tester);
 
       await tester.pageBack();
       await tester.pumpAndSettle();
 
-      expect(find.text('Elegí un juego'), findsOneWidget);
+      expect(find.text('PACO'), findsOneWidget);
     });
   });
 }

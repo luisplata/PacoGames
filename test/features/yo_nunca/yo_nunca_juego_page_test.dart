@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:paco_game/core/contenido/entidades.dart';
 
+import 'package:paco_game/features/home/presentation/home_page.dart';
+
 import '../helpers.dart';
 
 const _normal = Genero(nombre: 'Normal', cartas: ['N1', 'N2', 'N3']);
@@ -27,7 +29,7 @@ const _fraseKey = Key('frase_yo_nunca');
 const _bannerTexto = 'Modo sin alcohol: los tragos se leen como prendas';
 const _cartasNormales = ['N1', 'N2', 'N3'];
 
-/// Camino real: home → selector → Yo Nunca (instrucciones) → [Jugar] → juego.
+/// Camino real: home → Yo Nunca (instrucciones) → [Jugar] → juego.
 /// Con fakes de audio/hápticos (seam AH3) — devuelve los fakes para
 /// assertar llamadas de SFX/hápticos.
 Future<FakesAudio> irAlJuego(
@@ -45,9 +47,7 @@ Future<FakesAudio> irAlJuego(
     vibracion: vibracion,
     diagnostico: diagnostico ?? _diagnosticoFake,
   );
-  await tester.tap(find.widgetWithText(FilledButton, 'Jugar'));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Yo Nunca'));
+  await tester.tap(find.byKey(HomeKeys.yoNunca));
   await tester.pumpAndSettle();
   await tocarBoton(tester, 'Jugar'); // [Jugar] de instrucciones → /yo-nunca/juego
   return fakes;
@@ -218,10 +218,10 @@ void main() {
       expect(find.text('Yo nunca'), findsOneWidget); // instrucciones
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Elegí un juego'), findsOneWidget); // selector
+      expect(find.text('PACO'), findsOneWidget); // Home
 
       // Re-entrar → estado descartado (autoDispose) → picker de nuevo.
-      await tester.tap(find.text('Yo Nunca'));
+      await tester.tap(find.byKey(HomeKeys.yoNunca));
       await tester.pumpAndSettle();
       await tocarBoton(tester, 'Jugar');
       expect(find.text('Elegí un género'), findsOneWidget);

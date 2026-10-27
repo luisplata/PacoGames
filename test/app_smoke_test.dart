@@ -8,8 +8,8 @@ void main() {
       (tester) async {
     await arrancarApp(tester, splashVisto: true);
 
-    expect(find.text('PacoGames'), findsOneWidget);
-    expect(find.text('Jugar'), findsOneWidget);
+    expect(find.text('PACO'), findsOneWidget);
+    expect(find.text('Previas Argentinas Co'), findsOneWidget);
   });
 
   testWidgets('app boots to splash on first run (splashVisto=false)',

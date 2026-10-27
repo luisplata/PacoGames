@@ -8,7 +8,7 @@ void main() {
   group('SelectorPage', () {
     testWidgets('muestra las 3 tarjetas con nombre y descripción', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
+      await irARuta(tester, '/selector');
 
       expect(find.text('Yo Nunca'), findsOneWidget);
       expect(find.text('Ruleta'), findsOneWidget);
@@ -20,7 +20,7 @@ void main() {
 
     testWidgets('Yo Nunca navega a /yo-nunca (sin snackbar)', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
+      await irARuta(tester, '/selector');
 
       await tester.tap(find.text('Yo Nunca'));
       await tester.pumpAndSettle();
@@ -32,7 +32,7 @@ void main() {
 
     testWidgets('Ruleta navega a /ruleta (sin snackbar)', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
+      await irARuta(tester, '/selector');
 
       await tester.tap(find.text('Ruleta'));
       await tester.pumpAndSettle();
@@ -47,7 +47,7 @@ void main() {
 
     testWidgets('Pictionary navega a /pictionary (sin snackbar)', (tester) async {
       await arrancarApp(tester, splashVisto: true);
-      await navegarDesdeHome(tester, 'Jugar');
+      await irARuta(tester, '/selector');
 
       await tester.tap(find.text('Pictionary'));
       await tester.pumpAndSettle();
@@ -75,7 +75,7 @@ void main() {
         errores: const [],
       );
       await arrancarApp(tester, splashVisto: true, diagnostico: diagnostico);
-      await navegarDesdeHome(tester, 'Jugar');
+      await irARuta(tester, '/selector');
 
       expect(find.text('sin contenido'), findsOneWidget);
 

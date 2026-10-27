@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -162,8 +163,17 @@ Future<FakesAudio> arrancarConAudio(
   return fakes;
 }
 
-/// Navega hasta la ruta indicada tocando el camino real desde /home.
-Future<void> navegarDesdeHome(WidgetTester tester, String textoBoton) async {
-  await tester.tap(find.widgetWithText(FilledButton, textoBoton));
+/// Navega desde el Home tocando el widget indicado (botón de juego, engranaje,
+/// etc.). El Home nuevo no usa botones Material, así que recibe un [Finder].
+Future<void> navegarDesdeHome(WidgetTester tester, Finder destino) async {
+  await tester.tap(destino);
+  await tester.pumpAndSettle();
+}
+
+/// Navega directo a una ruta (para pantallas que ya no se alcanzan desde el
+/// Home, como el selector legacy).
+Future<void> irARuta(WidgetTester tester, String ruta) async {
+  final context = tester.element(find.byType(Scaffold).first);
+  GoRouter.of(context).go(ruta);
   await tester.pumpAndSettle();
 }

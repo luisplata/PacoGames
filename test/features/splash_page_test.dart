@@ -32,8 +32,8 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Entendido'));
       await tester.pumpAndSettle();
 
-      // Llegamos al Home: botón Jugar visible, splash ya no está.
-      expect(find.text('Jugar'), findsOneWidget);
+      // Llegamos al Home: título visible, splash ya no está.
+      expect(find.text('PACO'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Entendido'), findsNothing);
     });
 
@@ -41,7 +41,7 @@ void main() {
         (tester) async {
       await arrancarApp(tester, splashVisto: true);
 
-      expect(find.text('Jugar'), findsOneWidget);
+      expect(find.text('PACO'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Entendido'), findsNothing);
     });
 
