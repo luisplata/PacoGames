@@ -3,20 +3,252 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PACO: Juegos de Previa</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>PACO — Juegos de Previa | La previa en un teléfono</title>
+  <meta name="description" content="PACO es el juego de previa definitivo: Yo Nunca, Ruleta y Pictionary en un solo teléfono. Descargalo gratis en Google Play.">
+  <meta name="theme-color" content="#070b1c">
+  <link rel="canonical" href="https://luisplata.github.io/PacoGames/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PACO — Juegos de Previa">
+  <meta property="og:description" content="Tres juegos, un celular y la previa resuelta. Descargalo gratis en Google Play.">
+  <meta property="og:url" content="https://luisplata.github.io/PacoGames/">
+  <meta property="og:image" content="https://luisplata.github.io/PacoGames/assets/og-paco.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PACO — Juegos de Previa">
+  <meta name="twitter:description" content="Tres juegos, un celular y la previa resuelta.">
+  <meta name="twitter:image" content="https://luisplata.github.io/PacoGames/assets/og-paco.jpg">
+
+  <link rel="icon" type="image/png" href="assets/icono-playstore.png">
+  <link rel="apple-touch-icon" href="assets/icono-playstore.png">
+  <link rel="preload" href="assets/fonts/grobold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/montserrat-bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
-  <main class="container">
-    <h1>PACO: Juegos de Previa</h1>
-    <p class="notice">Sitio en construcción. La versión web del juego va a vivir acá.</p>
-    <nav class="links">
-      <a href="privacidad.html">Política de Privacidad</a>
-      <a href="terminos.html">Términos y Condiciones</a>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <header class="site-header">
+    <nav class="nav container" aria-label="Navegación principal">
+      <a class="brand" href="./" aria-label="PACO, inicio">
+        <img src="assets/icono-playstore.png" alt="" width="38" height="38">
+        <span>PACO</span>
+      </a>
+      <div class="nav-links">
+        <a href="#juegos">Juegos</a>
+        <a href="#como-jugar">Cómo se juega</a>
+        <a class="nav-cta" href="https://play.google.com/store/apps/details?id=com.bellseboss.v2.pacogame" target="_blank" rel="noopener">Descargar</a>
+      </div>
     </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-halo hero-halo-1" aria-hidden="true"></div>
+      <div class="hero-halo hero-halo-2" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-card">
+          <p class="eyebrow">La previa en un teléfono</p>
+          <h1>
+            <span class="h1-paco">PACO</span>
+            <span class="h1-sub">Previas Argentinas Co.</span>
+          </h1>
+          <p class="lead">Tres juegos para romper el hielo, cagarte de risa y arrancar la noche. Un solo celular. Cero vueltas.</p>
+
+          <div class="hero-actions">
+            <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.bellseboss.v2.pacogame" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              <span><small>Descargar en</small>Google Play</span>
+            </a>
+            <a class="btn btn-ghost" href="#juegos">Ver los juegos</a>
+          </div>
+
+          <div class="hero-meta">
+            <span class="age">+18</span>
+            <span>Gratis · Android</span>
+            <span>Sin registro</span>
+          </div>
+
+          <div class="qr-inline">
+            <img src="assets/qr-playstore.png" alt="Código QR para descargar PACO en Google Play" width="92" height="92" loading="eager">
+            <div>
+              <strong>Escaneá y jugá</strong>
+              <span>Abrí la cámara del celu y listo.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-art">
+          <div class="phone">
+            <img src="assets/hero-home.webp" alt="Pantalla de inicio de PACO con los juegos Yo Nunca, Ruleta y Pictionary" width="1080" height="1920" loading="eager">
+          </div>
+          <span class="float-chip chip-1">3 juegos</span>
+          <span class="float-chip chip-2">Modo sin alcohol</span>
+          <span class="float-chip chip-3">+18</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="juegos" class="section games">
+      <div class="container">
+        <div class="section-head">
+          <p class="kicker">Elegí el juego</p>
+          <h2>Tres juegos, una previa</h2>
+          <p>Yo Nunca, Ruleta y Pictionary. El que el grupo quiera, en el mismo teléfono.</p>
+        </div>
+
+        <div class="game-grid">
+          <article class="game-card game-blue">
+            <img src="assets/home-yo-nunca.png" alt="Yo Nunca, juego de PACO" loading="lazy" decoding="async">
+            <h3>Yo Nunca</h3>
+            <p>Frases para confesar lo que nunca… y descubrir quién sí. Elegí nivel Normal o Picante.</p>
+            <span class="tag">Normal + Picante</span>
+          </article>
+
+          <article class="game-card game-pink">
+            <img src="assets/home-ruleta.png" alt="Ruleta, juego de PACO" loading="lazy" decoding="async">
+            <h3>Ruleta</h3>
+            <p>Girás y te toca. La ruleta elige por vos y no se repite hasta agotar la lista.</p>
+            <span class="tag">Sin repetir</span>
+          </article>
+
+          <article class="game-card game-red">
+            <img src="assets/home-pictionary.png" alt="Pictionary, juego de PACO" loading="lazy" decoding="async">
+            <h3>Pictionary</h3>
+            <p>Dibujá y adiviná. Sesenta segundos de caos, papel y risas.</p>
+            <span class="tag">Con timer</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="como-jugar" class="section how">
+      <div class="container how-grid">
+        <div class="how-copy">
+          <p class="kicker">Así de simple</p>
+          <h2>Cómo se juega</h2>
+          <p class="how-lead">No hay instrucciones eternas: elegís, pasás el teléfono y empieza la previa.</p>
+
+          <ol class="steps">
+            <li>
+              <span class="step-num">01</span>
+              <div>
+                <h3>Elegí un juego</h3>
+                <p>Yo Nunca, Ruleta o Pictionary. El que el grupo quiera.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">02</span>
+              <div>
+                <h3>Pasá el teléfono</h3>
+                <p>Cada uno lee, dibuja o gira cuando le toca.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">03</span>
+              <div>
+                <h3>Que empiece la previa</h3>
+                <p>Sin registro, sin vueltas. El que pierde, toma o paga prenda.</p>
+              </div>
+            </li>
+          </ol>
+
+          <a class="btn btn-dark" href="https://play.google.com/store/apps/details?id=com.bellseboss.v2.pacogame" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            <span>Descargar PACO</span>
+          </a>
+        </div>
+
+        <figure class="how-art">
+          <img src="assets/como-jugar.webp" alt="Pantalla de PACO explicando cómo jugar: girar la ruleta, responder o tomar" width="1080" height="1920" loading="eager" decoding="async">
+        </figure>
+      </div>
+    </section>
+
+    <section class="section features">
+      <div class="container">
+        <div class="section-head">
+          <p class="kicker">Hecho para la previa</p>
+          <h2>Todo lo que necesitás</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>
+            </span>
+            <h3>Sin registro</h3>
+            <p>Abrís, elegís y jugás. Nada de cuentas ni datos.</p>
+          </article>
+
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M2 2l20 20"/><path d="M5 5a16 16 0 0 1 14 0"/><path d="M8.5 8.5a11 11 0 0 1 7 0"/><path d="M10.7 12.7a5 5 0 0 1 2.6 0"/><circle cx="12" cy="18" r="1"/></svg>
+            </span>
+            <h3>Funciona offline</h3>
+            <p>No necesita internet. Ideal cuando la señal no colabora.</p>
+          </article>
+
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 3h12l-1 7a5 5 0 0 1-10 0L6 3Z"/><path d="M4 3h16"/><path d="M3 21l18-18"/></svg>
+            </span>
+            <h3>Modo sin alcohol</h3>
+            <p>Tragos = prendas. Jugá a tu manera, sin presión.</p>
+          </article>
+
+          <article class="feature">
+            <span class="feature-icon feature-age" aria-hidden="true">18+</span>
+            <h3>Contenido +18</h3>
+            <p>Picante opcional. Jugá con responsabilidad.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="descargar" class="download">
+      <div class="download-bg" aria-hidden="true"></div>
+      <div class="container download-inner">
+        <div class="download-copy">
+          <p class="kicker">La previa empieza acá</p>
+          <h2>Bajá PACO y que empiece la noche</h2>
+          <p>Gratis en Google Play. Un celular, tus amigos y nada más.</p>
+
+          <a class="btn btn-yellow" href="https://play.google.com/store/apps/details?id=com.bellseboss.v2.pacogame" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            <span><small>Descargar en</small>Google Play</span>
+          </a>
+
+          <p class="fine">+18 · Jugá con responsabilidad. El alcohol no es obligatorio.</p>
+        </div>
+
+        <div class="qr-card">
+          <img src="assets/qr-playstore.png" alt="Código QR para descargar PACO en Google Play" width="200" height="200" loading="lazy">
+          <strong>Escaneá y descargá</strong>
+          <span>Android · Google Play</span>
+        </div>
+      </div>
+    </section>
   </main>
-  <footer class="container">
-    <p>© 2026 Bellseboss Studio · <a href="mailto:info@bellseboss.com">info@bellseboss.com</a></p>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/icono-playstore.png" alt="" width="36" height="36">
+        <div>
+          <strong>PACO</strong>
+          <p>Previas Argentinas Co.<br>Hecho por Bellseboss Studio.</p>
+        </div>
+      </div>
+
+      <nav class="footer-links" aria-label="Enlaces legales y de contacto">
+        <a href="privacidad.html">Privacidad</a>
+        <a href="terminos.html">Términos</a>
+        <a href="https://www.instagram.com/bellseboss/" target="_blank" rel="noopener">Instagram</a>
+        <a href="mailto:info@bellseboss.com">Contacto</a>
+      </nav>
+    </div>
+    <p class="copyright">© 2026 Bellseboss Studio · Jugá con responsabilidad. +18.</p>
   </footer>
+
 </body>
 </html>
