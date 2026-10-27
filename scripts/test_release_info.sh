@@ -28,17 +28,30 @@ assert_line() { # $1 expected exact line, $2 actual output
   fi
 }
 
-# Case 1: happy path (run 42)
+# Case 1: happy path (run 42, attempt default 1) -> versionCode 421
 OUT="$(RUN_NUMBER=42 bash "$SCRIPT")"
 assert_line "VERSION=0.1.0+1" "$OUT"
 assert_line "VERSION_NAME=0.1.0" "$OUT"
 assert_line "VERSION_NUMBER=1" "$OUT"
+assert_line "BUILD_NUMBER=421" "$OUT"
 assert_line "TAG=v0.1.0-b42" "$OUT"
 assert_line "APK_NAME=PacoGames-dev-0.1.0-b42.apk" "$OUT"
 assert_line "AAB_NAME=PacoGames-0.1.0-b42.aab" "$OUT"
 assert_line "ZIP_NAME=PacoGames-web-0.1.0-b42.zip" "$OUT"
 
-# Case 2: RUN_NUMBER empty/missing -> must fail
+# Case 2: re-run del mismo run -> versionCode distinto (422)
+OUT="$(RUN_NUMBER=42 RUN_ATTEMPT=2 bash "$SCRIPT")"
+assert_line "BUILD_NUMBER=422" "$OUT"
+
+# Case 3: RUN_ATTEMPT inválido -> must fail
+if RUN_NUMBER=42 RUN_ATTEMPT=x bash "$SCRIPT" >/dev/null 2>&1; then
+  fail=$((fail + 1))
+  echo "FAIL: expected non-zero exit when RUN_ATTEMPT is not numeric" >&2
+else
+  pass=$((pass + 1))
+fi
+
+# Case 4: RUN_NUMBER empty/missing -> must fail
 if RUN_NUMBER="" bash "$SCRIPT" >/dev/null 2>&1; then
   fail=$((fail + 1))
   echo "FAIL: expected non-zero exit when RUN_NUMBER is empty" >&2

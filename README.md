@@ -78,14 +78,28 @@ The smoke test (`test/app_smoke_test.dart`) pumps the real app inside a
 
 [![CI + Release](https://github.com/luisplata/PacoGames/actions/workflows/ci-release.yml/badge.svg)](https://github.com/luisplata/PacoGames/actions/workflows/ci-release.yml)
 
-Cada push a `main` (o dispatch manual desde Actions) corre analyze + tests,
-compila un APK dev (debug) y un ZIP web, y publica un GitHub Release con ambos
-artefactos descargables. La versión sale de `pubspec.yaml`; cada run tiene un
-tag único `v<version>-b<run_number>`, así que ningún release se pisa.
+Es **manual** (`workflow_dispatch` desde Actions): corre analyze + tests,
+compila APK y AAB de release + ZIP web, y publica un GitHub Release con los
+tres artefactos. Cada run tiene un tag único `v<version>-b<run_number>`, así
+que ningún release se pisa.
+
+### Versionado
+
+- **versionName** (el que se ve en Play): sale de `version:` en `pubspec.yaml`
+  antes del `+` (hoy `0.1.0`). Se cambia cuando decidís una release, no en cada
+  build. Si querés automatizar también esto, el siguiente paso es
+  `release-please`/semantic-release (PR de release + tag).
+- **versionCode** (interno y obligatorio monótono en Play): lo calcula el CI
+  como `run_number * 10 + run_attempt` y se pasa con `--build-number`. **No se
+  commitea.** Ejemplo: run 13, intento 1 → `131`.
+- El `+1` de `pubspec.yaml` es solo el default de desarrollo. El CI lo pisa con
+  `--build-name`/`--build-number`; por eso el AAB deja de salir siempre con
+  versión 1.
 
 | Artefacto | Nombre |
 |---|---|
-| APK dev | `PacoGames-dev-<version>-b<run>.apk` |
+| APK | `PacoGames-dev-<version>-b<run>.apk` |
+| AAB | `PacoGames-<version>-b<run>.aab` |
 | Web (ZIP) | `PacoGames-web-<version>-b<run>.zip` |
 
 ## Structure
