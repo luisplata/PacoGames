@@ -3,17 +3,33 @@ name: CI + Release
 # "Run workflow". NO automático por push — evitar abuso de releases/costos.
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: SemVer bump for the next release
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 permissions:
   contents: write
 concurrency:
   group: ci-release-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Guard — main branch only
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::This workflow must run from main (current: ${{ github.ref }})."
+          exit 1
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -46,11 +62,27 @@ jobs:
         run: bash scripts/test_release_info.sh
       - name: Extract version
         id: version
-        run: RUN_NUMBER=${{ github.run_number }} RUN_ATTEMPT=${{ github.run_attempt }} bash scripts/release-info.sh >> "$GITHUB_OUTPUT"
+        run: |
+          set -euo pipefail
+          LATEST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-b[0-9]+)?$' | head -1 || true)
+          if [ -z "$LATEST_TAG" ]; then
+            CURRENT_VERSION=$(grep '^version: ' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)
+          else
+            CURRENT_VERSION="${LATEST_TAG#v}"
+            CURRENT_VERSION="${CURRENT_VERSION%%-*}"
+          fi
+          echo "current=$CURRENT_VERSION (latest tag: ${LATEST_TAG:-none})"
+          CURRENT_VERSION="$CURRENT_VERSION" BUMP="${{ github.event.inputs.bump }}" bash scripts/release-info.sh >> "$GITHUB_OUTPUT"
+      - name: Check tag is free
+        run: |
+          if git show-ref --verify --quiet "refs/tags/${{ steps.version.outputs.TAG }}"; then
+            echo "::error::Tag ${{ steps.version.outputs.TAG }} already exists. Choose a different bump."
+            exit 1
+          fi
       - name: Show version
         run: |
           echo "versionName=${{ steps.version.outputs.VERSION_NAME }}"
-          echo "versionCode=${{ steps.version.outputs.BUILD_NUMBER }}"
+          echo "versionCode=${{ steps.version.outputs.VERSION_CODE }}"
       # Decodificar keystore de producción desde secrets (patrón ref 500preguntas).
       # KEYSTORE_BASE64 = base64 del upload-keystore.jks; KEY_PROPERTIES =
       # contenido de android/key.properties con storeFile=upload-keystore.jks.
@@ -66,9 +98,9 @@ jobs:
           ls -la android/app/upload-keystore.jks android/key.properties
           test -s android/app/upload-keystore.jks && echo "keystore decodificado OK"
       - name: Build APK
-        run: flutter build apk --release --build-name="${{ steps.version.outputs.VERSION_NAME }}" --build-number="${{ steps.version.outputs.BUILD_NUMBER }}"
+        run: flutter build apk --release --build-name="${{ steps.version.outputs.VERSION_NAME }}" --build-number="${{ steps.version.outputs.VERSION_CODE }}"
       - name: Build AAB
-        run: flutter build appbundle --release --build-name="${{ steps.version.outputs.VERSION_NAME }}" --build-number="${{ steps.version.outputs.BUILD_NUMBER }}"
+        run: flutter build appbundle --release --build-name="${{ steps.version.outputs.VERSION_NAME }}" --build-number="${{ steps.version.outputs.VERSION_CODE }}"
       - run: flutter build web
       - name: Package artifacts
         run: |
@@ -79,7 +111,7 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
           target_commitish: ${{ github.sha }}
-          name: PacoGames dev ${{ steps.version.outputs.VERSION_NAME }} (build ${{ steps.version.outputs.BUILD_NUMBER }})
+          name: PacoGames ${{ steps.version.outputs.VERSION_NAME }} (versionCode ${{ steps.version.outputs.VERSION_CODE }})
           generate_release_notes: true
           files: |
             ${{ steps.version.outputs.APK_NAME }}

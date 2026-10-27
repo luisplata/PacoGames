@@ -78,29 +78,29 @@ The smoke test (`test/app_smoke_test.dart`) pumps the real app inside a
 
 [![CI + Release](https://github.com/luisplata/PacoGames/actions/workflows/ci-release.yml/badge.svg)](https://github.com/luisplata/PacoGames/actions/workflows/ci-release.yml)
 
-Es **manual** (`workflow_dispatch` desde Actions): corre analyze + tests,
-compila APK y AAB de release + ZIP web, y publica un GitHub Release con los
-tres artefactos. Cada run tiene un tag único `v<version>-b<run_number>`, así
-que ningún release se pisa.
+Es **manual** (`workflow_dispatch` desde Actions): elegís `patch`, `minor` o
+`major`; corre analyze + tests, compila APK y AAB de release + ZIP web, y
+publica un GitHub Release con los tres artefactos. El próximo SemVer se calcula
+desde el último tag `vX.Y.Z` (los tags legacy `vX.Y.Z-bN` se aceptan y se
+normalizan). El tag del release es `vX.Y.Z`.
 
 ### Versionado
 
-- **versionName** (el que se ve en Play): sale de `version:` en `pubspec.yaml`
-  antes del `+` (hoy `0.1.0`). Se cambia cuando decidís una release, no en cada
-  build. Si querés automatizar también esto, el siguiente paso es
-  `release-please`/semantic-release (PR de release + tag).
-- **versionCode** (interno y obligatorio monótono en Play): lo calcula el CI
-  como `run_number * 10 + run_attempt` y se pasa con `--build-number`. **No se
-  commitea.** Ejemplo: run 13, intento 1 → `131`.
-- El `+1` de `pubspec.yaml` es solo el default de desarrollo. El CI lo pisa con
-  `--build-name`/`--build-number`; por eso el AAB deja de salir siempre con
-  versión 1.
+- **versionName** (visible en Play): SemVer calculado desde el último tag +
+  el bump elegido. Ej: `0.1.0` + `minor` → `0.2.0`.
+- **versionCode** (interno, Play exige monótono): `major*1e6 + minor*1e3 + patch`.
+  Ej: `0.2.0` → `2000`; `1.0.0` → `1000000`.
+- El `+N` de `pubspec.yaml` es solo el default de desarrollo; el CI lo pisa con
+  `--build-name`/`--build-number`. No se commitea ningún bump.
+- Si el tag ya existe, el workflow falla antes de buildear: elegí otro bump.
+- Para una release manual: Actions → CI + Release → Run workflow → `patch` /
+  `minor` / `major`.
 
 | Artefacto | Nombre |
 |---|---|
-| APK | `PacoGames-dev-<version>-b<run>.apk` |
-| AAB | `PacoGames-<version>-b<run>.aab` |
-| Web (ZIP) | `PacoGames-web-<version>-b<run>.zip` |
+| APK | `PacoGames-<version>.apk` |
+| AAB | `PacoGames-<version>.aab` |
+| Web (ZIP) | `PacoGames-web-<version>.zip` |
 
 ## Structure
 
