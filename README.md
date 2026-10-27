@@ -1,5 +1,7 @@
 # PacoGames
 
+**Jugá PACO:** [Google Play](https://play.google.com/store/apps/details?id=com.bellseboss.v2.pacogame) · [itch.io](https://bellseboss.itch.io/)
+
 Evolución de **PACO** (proyecto original en Unity) ahora reescrito en Flutter.
 Base Flutter con estructura feature-first, Riverpod 3 para estado/DI y go_router
 para navegación. Aún no hay features de juego — esta es la base ejecutable.
