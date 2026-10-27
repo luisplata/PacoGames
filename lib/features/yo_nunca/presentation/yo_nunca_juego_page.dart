@@ -10,10 +10,12 @@ import '../../../core/widgets/aviso_modo_sin_alcohol.dart';
 import '../application/carta_yo_nunca.dart';
 import '../application/mazo.dart';
 import '../application/yo_nunca_providers.dart';
+import 'widgets/carta_yo_nunca_flip.dart';
 
-/// Juego de Yo Nunca (YN4-YN6, YN8) — paso intermedio de WU2: sin picker,
-/// arranca directo con el nivel elegido en reglas y muestra el frente con la
-/// imagen arriba + frase abajo. El flip/juramento llega en WU3.
+/// Juego de Yo Nunca (YN4-YN6, YN8): sin picker, arranca directo con el
+/// nivel elegido en reglas y la primera carta BOCA ABAJO (dorso por tipo).
+/// El widget [CartaYoNuncaFlip] es dueño del reveal; esta página espeja si
+/// terminó (`_revelada`) para habilitar `[Siguiente]`.
 class YoNuncaJuegoPage extends ConsumerStatefulWidget {
   const YoNuncaJuegoPage({super.key});
 
@@ -25,6 +27,17 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
   /// Permite el pop real tras confirmar la salida (D6): con canPop false
   /// `context.pop()` quedaría bloqueado por el PopScope.
   bool _salirConfirmado = false;
+
+  /// Espejo del flip: habilita `[Siguiente]` solo al terminar la animación.
+  bool _revelada = false;
+
+  /// El juramento se muestra solo en la primera carta de la partida (D7);
+  /// no se resetea al remezclar, sí al re-entrar (autoDispose de la página).
+  bool _juramentoCumplido = false;
+
+  /// Fuerza un estado limpio del flip aunque la primera carta coincida tras
+  /// una reconstrucción externa del mazo o una remezcla.
+  int _generacion = 0;
 
   Future<void> _mostrarDialogoSalida() async {
     final salir = await showDialog<bool>(
@@ -60,6 +73,34 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     }
   }
 
+  void _onRevelada() {
+    if (!mounted) return;
+    setState(() {
+      _revelada = true;
+      _juramentoCumplido = true;
+    });
+  }
+
+  void _siguiente() {
+    // AH6: click en [Siguiente].
+    ref.read(sonidoServicioProvider).reproducirClick();
+    ref.read(yoNuncaMazoProvider.notifier).siguiente();
+    setState(() {
+      _revelada = false;
+      _generacion++;
+    });
+  }
+
+  void _remezclar() {
+    // AH6: click en [Mezclar de nuevo].
+    ref.read(sonidoServicioProvider).reproducirClick();
+    ref.read(yoNuncaMazoProvider.notifier).remezclar();
+    setState(() {
+      _revelada = false;
+      _generacion++;
+    });
+  }
+
   String _nombreNivel(NivelYoNunca nivel) =>
       nivel == NivelYoNunca.picante ? 'Picante' : 'Normal';
 
@@ -69,21 +110,18 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     final ajustes = ref.watch(ajustesProvider);
     final nivel = ref.watch(yoNuncaNivelProvider);
     // WU2 usa el campo + `Ajustes.defaults`; WU4 cambia default y getter.
-    final modoAlcohol = ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
+    final modoAlcohol =
+        ajustes.value?.modoAlcohol ?? Ajustes.defaults.modoAlcohol;
     final efectivo = nivelEfectivo(elegido: nivel, modoAlcohol: modoAlcohol);
 
-    // AH6 (interino): SFX `carta` al cambiar la carta visible (Siguiente,
-    // mezclar, cambio de mazo). El tap-reveal de WU3 mueve este SFX al tap.
+    // Reconstrucción externa del mazo (nivel/ajustes): la carta nace limpia
+    // y boca abajo. El SFX `carta` ahora vive en el tap del flip, no acá.
     ref.listen(yoNuncaMazoProvider, (prev, next) {
-      final anterior = prev?.cartaActual?.texto;
-      final actual = next.cartaActual;
-      // `prev.total == 0` es la carga inicial (diagnóstico/ajustes aún
-      // resolviendo), no un avance real: no suena.
-      if (prev != null &&
-          prev.total > 0 &&
-          actual != null &&
-          actual.texto != anterior) {
-        ref.read(sonidoServicioProvider).reproducirCarta();
+      if (prev != null && next.total != prev.total) {
+        setState(() {
+          _revelada = false;
+          _generacion++;
+        });
       }
     });
 
@@ -135,6 +173,8 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
                                     ),
                                   ),
                                 ),
+                                if (mazo.total > 0 && mazo.total < 5)
+                                  _pocoContenido(),
                               ],
                             ),
                           ),
@@ -157,6 +197,24 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     );
   }
 
+  Widget _pocoContenido() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: .35),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        'Poco contenido en este nivel',
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: .9),
+          fontSize: 12,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+  }
+
   Widget _contenido(Mazo<CartaYoNunca> mazo) {
     if (mazo.total == 0) {
       // Edge defensivo YN4: sin cartas para el nivel → C16, sin crash.
@@ -167,9 +225,9 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
             'Sin cartas disponibles en este nivel.',
             key: const Key('sin_cartas_nivel'),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.white),
           ),
         ),
       );
@@ -188,17 +246,13 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
               Text(
                 'Se acabaron las cartas: se mezclan de nuevo',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () {
-                  // AH6: click en [Mezclar de nuevo].
-                  ref.read(sonidoServicioProvider).reproducirClick();
-                  ref.read(yoNuncaMazoProvider.notifier).remezclar();
-                },
+                onPressed: _remezclar,
                 child: const Text('Mezclar de nuevo'),
               ),
             ],
@@ -208,53 +262,44 @@ class _YoNuncaJuegoPageState extends ConsumerState<YoNuncaJuegoPage> {
     }
 
     final carta = mazo.cartaActual!;
-    final pocoContenido = mazo.total < 5;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          // Layout interino de WU2 (el flip llega en WU3).
-          Image.asset(
-            'assets/images/carta_${carta.nivel.name}.webp',
-            height: 180,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            carta.texto,
-            key: const Key('frase_yo_nunca'),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  height: 1.3,
-                ),
-          ),
-          if (pocoContenido) ...[
-            const SizedBox(height: 12),
-            Text(
-              'Poco contenido en este nivel',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: .85),
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-              ),
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+            child: CartaYoNuncaFlip(
+              key: ValueKey('${carta.texto}|${carta.nivel.name}|$_generacion'),
+              carta: carta,
+              mostrarJuramento: !_juramentoCumplido,
+              onRevelada: _onRevelada,
+              onRevelarIniciado: () =>
+                  ref.read(sonidoServicioProvider).reproducirCarta(),
             ),
-          ],
-          const SizedBox(height: 32),
-          FilledButton(
-            onPressed: () {
-              // AH6: click en [Siguiente].
-              ref.read(sonidoServicioProvider).reproducirClick();
-              ref.read(yoNuncaMazoProvider.notifier).siguiente();
-            },
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-            ),
-            child: const Text('Siguiente', style: TextStyle(fontSize: 18)),
           ),
-        ],
-      ),
+        ),
+        // Alto fijo: [Siguiente] no empuja la carta al aparecer (design §5).
+        SizedBox(
+          height: 72,
+          child: Center(
+            child: _revelada
+                ? FilledButton(
+                    onPressed: _siguiente,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48,
+                        vertical: 14,
+                      ),
+                    ),
+                    child: const Text(
+                      'Siguiente',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ),
+      ],
     );
   }
 }

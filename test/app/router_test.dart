@@ -214,13 +214,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Yo nunca'), findsOneWidget);
 
-      // [Jugar] → /yo-nunca/juego. El fake tiene 1 solo género visible
-      // (Normal) → auto-select → carta con [Siguiente] (YN4).
+      // [Jugar] → /yo-nunca/juego. El fake tiene 1 solo género (Normal):
+      // la partida arranca boca abajo con el juramento (YN6).
       final jugar = find.widgetWithText(FilledButton, 'Jugar');
       await tester.ensureVisible(jugar);
       await tester.pumpAndSettle();
       await tester.tap(jugar);
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('dorso_yo_nunca')), findsOneWidget);
+      expect(
+        find.text('Juro solemnemente que mis intenciones no son buenas.'),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(FilledButton, 'Siguiente'), findsNothing);
+
+      // tap → flip → frente con C3 + [Siguiente] (YN6).
+      await tester.tap(find.byKey(const Key('carta_yo_nunca')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('frente_yo_nunca')), findsOneWidget);
+      expect(find.text('Yo nunca nunca...'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Siguiente'), findsOneWidget);
     });
   });
